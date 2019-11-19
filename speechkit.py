@@ -1,5 +1,7 @@
 import requests
 from os import system
+import time
+import json
 
 
 class recognizeShortAudio:
@@ -39,6 +41,12 @@ def recode (inputfile, outputfile):
 
 class objectStorage:
     def __init__ (self, aws_access_key_id, aws_secret_access_key):
+        """Starting ssesion with boto3 to access objectStorage
+
+        :param aws_access_key_id: string
+        :param aws_secret_access_key: string
+        """
+
         import boto3
         # system("cd ~")
         # system("mkdir .aws")
@@ -51,6 +59,13 @@ class objectStorage:
         )
 
     def upload_file(self, inputfilepath, baketname, outputfilename):
+        """Upload a file to object storage
+
+        :param inputfilepath: string, path to input file
+        :param baketname: string
+        :param outputfilename: string, name of file in object storage
+        """
+
         return self.s3.upload_file(inputfilepath, baketname, outputfilename)
 
 
@@ -79,3 +94,61 @@ class objectStorage:
 
         # The response contains the presigned URL
         return response
+
+
+class recognizeLongAudio:
+    def __init__(self, apiKey):
+        """Initialize apiKey for recognizing long audio
+
+        :param apiKey: string
+        """
+
+        self.apiKey = apiKey
+        self.header = {'Authorization': 'Api-Key {}'.format(self.apiKey)}
+
+
+    def recognize_post(self, filelink):
+        """POST request to recognize long audio
+
+        :param filelink: string
+        """
+
+        POST = "https://transcribe.api.cloud.yandex.net/speech/stt/v2/longRunningRecognize"
+        body ={
+            "config": {
+                "specification": {
+                    "languageCode": "ru-RU"
+                }
+            },
+            "audio": {
+                "uri": filelink
+            }
+        }
+        req = requests.post(POST, headers=self.header, json=body)
+        data = req.json()
+        print(data)
+
+        self.id = data['id']
+
+
+    def ready_request(self, u):
+        GET = "https://operation.api.cloud.yandex.net/operations/{id}"
+        req = requests.get(GET.format(id=self.id), headers=self.header)
+        req = req.json()
+        self.req = req
+        return req['done']
+
+
+    def return_json(self):
+        return json.dumps(self.req, ensure_ascii=False, indent=2)
+
+
+    def return_list(self):
+        return self.req
+
+
+    def return_text(self):
+        strr = ''
+        for chunk in req['response']['chunks']:
+            strr = strr + str(chunk['alternatives'][0]['text'])
+        return strr
