@@ -31,7 +31,7 @@ while True:
 output = recognizeLongAudio.return_json()
 
 with open(outfilename, 'w') as outfile:
-    json.dump(output, outfile)
+    json.dump(output, outfile, ensure_ascii=False, indent=2)
 
 
 objectStorage.deleteObject(objstrname, baketname)
