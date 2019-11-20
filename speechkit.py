@@ -36,8 +36,18 @@ def recode (inputfile, outputfile):
     """
 
     cmd = "ffmpeg -i '" + str(inputfile) + "' '" + str(outputfile) + "'"
-    system(cmd)
+    out = system(cmd)
+    return out
 
+def removefile(inputfile):
+    """Removes file
+
+    :param inputfile: string, path to input file
+    """
+
+    cmd = "rm '" + str(inputfile) + "'"
+    out = system(cmd)
+    return out
 
 class objectStorage:
     def __init__ (self, aws_access_key_id, aws_secret_access_key):
@@ -140,15 +150,11 @@ class recognizeLongAudio:
 
 
     def return_json(self):
-        return json.dumps(self.req, ensure_ascii=False, indent=2)
-
-
-    def return_list(self):
         return self.req
 
 
     def return_text(self):
         strr = ''
-        for chunk in req['response']['chunks']:
+        for chunk in self.req['response']['chunks']:
             strr = strr + str(chunk['alternatives'][0]['text'])
         return strr
