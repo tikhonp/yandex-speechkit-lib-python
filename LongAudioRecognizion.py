@@ -10,15 +10,15 @@ objstrname = 'output' + str(str(str(datetime.now()).split(sep=' ')[1]).split(sep
 if speechkit.recode(filename, objstrname)!=0:
     raise Exception('RecoderingError')
 
-api_id = "FPqJ7DjY0exB05saMLFo"
-api_key = "IhFkcAfaoJgr4vF2FIOKpWXtClZrYO9MF5VKn9Wp"
+api_id = # your api id here
+api_key = # your api key here
 
 objectStorage = speechkit.objectStorage(api_id, api_key)
 objectStorage.upload_file(objstrname, baketname, objstrname)
 urltofile = objectStorage.create_presigned_url(baketname, objstrname)
 
 
-apiKey = 'AQVN3g4X20jg5vhLBtLnrVLmO3RCCLSEn_5OjjDQ'
+apiKey = # your api key here
 
 recognizeLongAudio = speechkit.recognizeLongAudio(apiKey)
 recognizeLongAudio.recognize_post(urltofile)
