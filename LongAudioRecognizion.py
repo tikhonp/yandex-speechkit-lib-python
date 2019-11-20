@@ -28,7 +28,14 @@ while True:
     if recognizeLongAudio.ready_request('j'): break
     print('recognizing ...')
 
-output = recognizeLongAudio.return_list()
+output = recognizeLongAudio.return_json()
 
 with open(outfilename, 'w') as outfile:
     json.dump(output, outfile)
+
+
+objectStorage.deleteObject(objstrname, baketname)
+
+for file in [filename, objstrname]:
+    if speechkit.removefile(file)!=0:
+        raise Exception('RemovingError')
