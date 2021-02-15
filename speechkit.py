@@ -1,7 +1,5 @@
 import requests
 from os import system
-import time
-import json
 
 
 class recognizeShortAudio:
@@ -15,17 +13,26 @@ class recognizeShortAudio:
 
 
     def recognize(self, file, folder):
-        url = "https://stt.api.cloud.yandex.net/speech/v1/stt:recognize?folderId={}".format(folder)
-        headers = {
-            "Authorization": "Bearer {}".format(self.token)
+        """
+        Recognizes audio file
+        :param file: string, path to audio file OOGopus format (You can use recode function to get oogopus)
+        :param folder: string, yandex catalog id, instruction: https://cloud.yandex.ru/docs/resource-manager/operations/folder/get-id
+        """
+        url = "https://stt.api.cloud.yandex.net/speech/v1/stt:recognize"
+        headers = { "Authorization": "Bearer {}".format(self.token) }
+        params = {
+            'lang': 'ru-RU',
+            'folderId': folder,
+            'format': 'lpcm',
+            'sampleRateHertz': 48000,
         }
 
-        answer = requests.post(url, data=open(file, 'rb').read(), headers=headers)
+        answer = requests.post(url, params=params, data=file, headers=headers)
 
         if answer.status_code != 200:
-            raise Exception("It's error with recognizing: {}".format(response.json()))
+            raise Exception("It's error with recognizing: {}".format(answer.json()))
         else:
-            return answer.text
+            return answer.json()['result']
 
 
 def recode (inputfile, outputfile):
@@ -98,8 +105,8 @@ class objectStorage:
 
         try:
             response = self.s3.generate_presigned_url('get_object',Params={'Bucket': bucket_name,'Key': object_name},ExpiresIn=expiration)
-        except ClientError as e:
-            logging.error(e)
+        except Exception as e:
+            print(e)
             return None
 
         # The response contains the presigned URL
@@ -158,3 +165,38 @@ class recognizeLongAudio:
         for chunk in self.req['response']['chunks']:
             strr = strr + str(chunk['alternatives'][0]['text'])
         return strr
+
+
+class synthesizeAudio:
+    def __init__(self, key, catalogId):
+        url = "https://iam.api.cloud.yandex.net/iam/v1/tokens"
+        data = {"yandexPassportOauthToken": key}
+        answer = requests.post(url, json=data)
+
+        self.token = answer.json()['iamToken']
+        self.catalogId = catalogId
+
+    def __synthesizeStream__(self, text):
+        url = 'https://tts.api.cloud.yandex.net/speech/v1/tts:synthesize'
+        headers = {
+            'Authorization': 'Bearer ' + self.token,
+        }
+
+        data = {
+            'text': text,
+            'lang': 'ru-RU',
+            'folderId': self.catalogId,
+            'voice': 'alena',
+        }
+
+        with requests.post(url, headers=headers, data=data, stream=True) as resp:
+            if resp.status_code != 200:
+                raise RuntimeError("Invalid response received: code: %d, message: %s" % (resp.status_code, resp.text))
+
+            for chunk in resp.iter_content(chunk_size=None):
+                yield chunk
+
+    def synthesize(self, text, filepath):
+        with open(filepath, "wb") as f:
+            for audio_content in self.__synthesizeStream__(text):
+                f.write(audio_content)
