@@ -1,49 +1,50 @@
 # speechkit lib python
- It's lib for using speechkit api by yandex.
+
+It's lib for using speechkit api by yandex.
  
 This lib supports short and long audio recognition of speechkit
  
 ## How to use
 
-### Import:
+Import:
 
 ```python3
 import speechkit
 ```
 
-### For short audio
+#### For short audio
 
-#### Init:
+Init:
 
 ```python3
 spchkt = speechkit.recognizeShortAudio(token)
 ```
 
-#### Use token for getting iam
+Use token for getting iam
 
-#### Recognize:
+Recognize:
 ```python3
 text = spchkt.recognize(filename, folder_id)
 ```
-#### Plese write folder_id
+Please write folder_id
 
-### For long audio
+#### For long audio
 
-#### For long audio you need to upload file to the yandex object storage. You can do it with objectStorage class:
+For long audio you need to upload file to the yandex object storage. You can do it with objectStorage class:
 
 ```python3
 objstor = speechkit.objectStorage(aws_access_key_id, aws_secret_access_key)
 ```
 
-#### Speechkit works with ogg opus file. This function recoding audio with ffmpeg. It works only on unix system and you need to install ffmpeg.
+Speechkit works with ogg opus file. This function recoding audio with ffmpeg. It works only on unix system and you need to install ffmpeg.
 ```python3
 out = speechkit.recode(infilename, outfilename)
 ```
 
-#### It will save opus file to the same directory.
+It will save opus file to the same directory.
 
-#### There is also supporting removing files by command rm <filename>
+There is also supporting removing files by command rm <filename>
 ```python3
 out = speechkit.removefile(inputfile)
 ```
-#### They return '0', if process was done successfully
+ They return '0', if process was done successfully
