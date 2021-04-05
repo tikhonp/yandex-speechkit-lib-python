@@ -2,7 +2,7 @@ import requests
 from os import system
 
 
-class recognizeShortAudio:
+class RecognizeShortAudio:
     def __init__(self, key):
         url = "https://iam.api.cloud.yandex.net/iam/v1/tokens"
         data = {"yandexPassportOauthToken": key}
@@ -11,15 +11,16 @@ class recognizeShortAudio:
         # print(answer.json()['iamToken'])
         self.token = answer.json()['iamToken']
 
-
     def recognize(self, file, folder):
         """
         Recognizes audio file
-        :param file: string, path to audio file OOGopus format (You can use recode function to get oogopus)
-        :param folder: string, yandex catalog id, instruction: https://cloud.yandex.ru/docs/resource-manager/operations/folder/get-id
+        :param file: string, path to audio file OOGopus format
+            (You can use recode function to get oogopus)
+        :param folder: string, yandex catalog id, instruction:
+            https://cloud.yandex.ru/docs/resource-manager/operations/folder/get-id
         """
         url = "https://stt.api.cloud.yandex.net/speech/v1/stt:recognize"
-        headers = { "Authorization": "Bearer {}".format(self.token) }
+        headers = {"Authorization": "Bearer {}".format(self.token)}
         params = {
             'lang': 'ru-RU',
             'folderId': folder,
@@ -30,12 +31,13 @@ class recognizeShortAudio:
         answer = requests.post(url, params=params, data=file, headers=headers)
 
         if answer.status_code != 200:
-            raise Exception("It's error with recognizing: {}".format(answer.json()))
+            raise Exception(
+                "It's error with recognizing: {}".format(answer.json()))
         else:
             return answer.json()['result']
 
 
-def recode (inputfile, outputfile):
+def recode(inputfile: str, outputfile: str):
     """Recodering file using ffmpeg
 
     :param inputfile: string, path to input file
@@ -46,7 +48,8 @@ def recode (inputfile, outputfile):
     out = system(cmd)
     return out
 
-def removefile(inputfile):
+
+def removefile(inputfile: str):
     """Removes file
 
     :param inputfile: string, path to input file
@@ -56,8 +59,9 @@ def removefile(inputfile):
     out = system(cmd)
     return out
 
-class objectStorage:
-    def __init__ (self, aws_access_key_id, aws_secret_access_key):
+
+class ObjectStorage:
+    def __init__(self, aws_access_key_id, aws_secret_access_key):
         """Starting ssesion with boto3 to access objectStorage
 
         :param aws_access_key_id: string
@@ -85,26 +89,29 @@ class objectStorage:
 
         return self.s3.upload_file(inputfilepath, baketname, outputfilename)
 
-
     def listObjectsInBucket(self, bucketname):
         return self.s3.list_objects(Bucket=bucketname)
 
-
     def deleteObject(self, object_name, bucketname):
-        return self.s3.delete_objects(Bucket=bucketname, Delete={'Objects': [{'Key': object_name}]})
-
+        return self.s3.delete_objects(
+            Bucket=bucketname, Delete={'Objects': [{'Key': object_name}]})
 
     def create_presigned_url(self, bucket_name, object_name, expiration=3600):
         """Generate a presigned URL to share an S3 object
 
         :param bucket_name: string
         :param object_name: string
-        :param expiration: Time in seconds for the presigned URL to remain valid
+        :param expiration: Time in seconds
+            for the presigned URL to remain valid
         :return: Presigned URL as string. If error, returns None.
         """
 
         try:
-            response = self.s3.generate_presigned_url('get_object',Params={'Bucket': bucket_name,'Key': object_name},ExpiresIn=expiration)
+            response = self.s3.generate_presigned_url(
+                'get_object',
+                Params={'Bucket': bucket_name, 'Key': object_name},
+                ExpiresIn=expiration
+            )
         except Exception as e:
             print(e)
             return None
@@ -113,7 +120,7 @@ class objectStorage:
         return response
 
 
-class recognizeLongAudio:
+class RecognizeLongAudio:
     def __init__(self, apiKey):
         """Initialize apiKey for recognizing long audio
 
@@ -123,7 +130,6 @@ class recognizeLongAudio:
         self.apiKey = apiKey
         self.header = {'Authorization': 'Api-Key {}'.format(self.apiKey)}
 
-
     def recognize_post(self, filelink):
         """POST request to recognize long audio
 
@@ -131,7 +137,7 @@ class recognizeLongAudio:
         """
 
         POST = "https://transcribe.api.cloud.yandex.net/speech/stt/v2/longRunningRecognize"
-        body ={
+        body = {
             "config": {
                 "specification": {
                     "languageCode": "ru-RU"
@@ -147,7 +153,6 @@ class recognizeLongAudio:
 
         self.id = data['id']
 
-
     def ready_request(self, u):
         GET = "https://operation.api.cloud.yandex.net/operations/{id}"
         req = requests.get(GET.format(id=self.id), headers=self.header)
@@ -155,10 +160,8 @@ class recognizeLongAudio:
         self.req = req
         return req['done']
 
-
     def return_json(self):
         return self.req
-
 
     def return_text(self):
         strr = ''
@@ -167,7 +170,7 @@ class recognizeLongAudio:
         return strr
 
 
-class synthesizeAudio:
+class SynthesizeAudio:
     def __init__(self, key, catalogId):
         url = "https://iam.api.cloud.yandex.net/iam/v1/tokens"
         data = {"yandexPassportOauthToken": key}
@@ -191,7 +194,9 @@ class synthesizeAudio:
 
         with requests.post(url, headers=headers, data=data, stream=True) as resp:
             if resp.status_code != 200:
-                raise RuntimeError("Invalid response received: code: %d, message: %s" % (resp.status_code, resp.text))
+                raise RuntimeError(
+                    "Invalid response received: code: %d, message: %s" % (
+                        resp.status_code, resp.text))
 
             for chunk in resp.iter_content(chunk_size=None):
                 yield chunk
