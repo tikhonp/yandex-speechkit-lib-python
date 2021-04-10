@@ -212,7 +212,7 @@ class SynthesizeAudio:
         : param io_stream: byttesIO object
         """
         audio_data = BytesIO()
-        for audio_content in self.__synthesizeStream(text):
+        for audio_content in self.__synthesizeStream__(text):
             audio_data.write(audio_content)
 
         return audio_data
