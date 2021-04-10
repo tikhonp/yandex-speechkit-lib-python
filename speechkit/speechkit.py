@@ -217,7 +217,7 @@ class SynthesizeAudio:
         :param lpcm: bool if True answer will be 48000/16 lpcm data or OOGopus if False
         """
         audio_data = BytesIO()
-        for audio_content in self.__synthesizeStream__(text):
+        for audio_content in self.__synthesizeStream__(text, lpcm):
             audio_data.write(audio_content)
 
         return audio_data
