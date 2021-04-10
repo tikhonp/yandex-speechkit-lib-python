@@ -12,5 +12,5 @@ setup(
     author="Tikhon Petrishchev",
     author_email="tikhon.petrishchev@gmail.com",
     packages=["speechkit"],
-    install_requires=["requests", "io", "json"],
+    install_requires=["requests", "json"],
 )

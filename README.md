@@ -2,7 +2,20 @@
 
 It's lib for using speechkit api by yandex.
  
-This lib supports short and long audio recognition of speechkit
+This lib supports short and long audio recognition of 
+speechkit
+
+## Install
+
+```
+pip install git+https://github.com/TikhonP/speechkit-lib-python.git
+```
+or
+
+```
+git clone https://github.com/TikhonP/speechkit-lib-python.git
+sudo python setup.py install
+```
  
 ## How to use
 
