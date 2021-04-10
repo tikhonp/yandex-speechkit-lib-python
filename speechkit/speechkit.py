@@ -1,4 +1,5 @@
 import requests
+from io import BytesIO
 from os import system
 
 
@@ -205,3 +206,13 @@ class SynthesizeAudio:
         with open(filepath, "wb") as f:
             for audio_content in self.__synthesizeStream__(text):
                 f.write(audio_content)
+
+    def synthesize_stream(self, text):
+        """
+        : param io_stream: byttesIO object
+        """
+        audio_data = BytesIO()
+        for audio_content in self.__synthesizeStream(text):
+            audio_data.write(audio_content)
+
+        return audio_data
