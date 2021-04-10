@@ -30,7 +30,7 @@ import speechkit
 Init:
 
 ```python3
-spchkt = speechkit.recognizeShortAudio(token)
+spchkt = speechkit.RecognizeShortAudio(token)
 ```
 
 Use token for getting iam
@@ -46,7 +46,7 @@ Please write folder_id
 For long audio you need to upload file to the yandex object storage. You can do it with objectStorage class:
 
 ```python3
-objstor = speechkit.objectStorage(aws_access_key_id, aws_secret_access_key)
+objstor = speechkit.ObjectStorage(aws_access_key_id, aws_secret_access_key)
 ```
 
 Speechkit works with ogg opus file. This function recoding audio with ffmpeg. It works only on unix system and you need to install ffmpeg.
