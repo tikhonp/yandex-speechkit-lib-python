@@ -180,7 +180,7 @@ class SynthesizeAudio:
         self.token = answer.json()['iamToken']
         self.catalogId = catalogId
 
-    def __synthesizeStream__(self, text):
+    def __synthesizeStream__(self, text, lpcm):
         url = 'https://tts.api.cloud.yandex.net/speech/v1/tts:synthesize'
         headers = {
             'Authorization': 'Bearer ' + self.token,
@@ -193,6 +193,10 @@ class SynthesizeAudio:
             'voice': 'alena',
         }
 
+        if lpcm:
+            data['format'] = 'lpcm',
+            data['sampleRateHertz'] = 48000,
+
         with requests.post(url, headers=headers, data=data, stream=True) as resp:
             if resp.status_code != 200:
                 raise RuntimeError(
@@ -202,14 +206,15 @@ class SynthesizeAudio:
             for chunk in resp.iter_content(chunk_size=None):
                 yield chunk
 
-    def synthesize(self, text, filepath):
+    def synthesize(self, text, filepath, lpcm=False):
         with open(filepath, "wb") as f:
-            for audio_content in self.__synthesizeStream__(text):
+            for audio_content in self.__synthesizeStream__(text, lpcm):
                 f.write(audio_content)
 
-    def synthesize_stream(self, text):
+    def synthesize_stream(self, text, lpcm=False):
         """
-        : param io_stream: byttesIO object
+        :param io_stream: byttesIO object
+        :param lpcm: bool if True answer will be 48000/16 lpcm data or OOGopus if False
         """
         audio_data = BytesIO()
         for audio_content in self.__synthesizeStream__(text):
