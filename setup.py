@@ -5,12 +5,12 @@ with open("README.md", "r") as f:
 
 setup(
     name="speechkit",
-    version="1.1.2",
+    version="1.2.0",
     description="It's lib for using speechkit api by yandex.",
     license="MIT",
     long_description=long_description,
     author="Tikhon Petrishchev",
     author_email="tikhon.petrishchev@gmail.com",
     packages=["speechkit"],
-    install_requires=["requests"],
+    install_requires=["requests", "boto3"],
 )

@@ -1,6 +1,6 @@
 import requests
-from io import BytesIO
 from os import system
+import boto3
 
 
 class RecognizeShortAudio:
@@ -9,8 +9,10 @@ class RecognizeShortAudio:
         data = {"yandexPassportOauthToken": key}
         answer = requests.post(url, json=data)
 
-        # print(answer.json()['iamToken'])
-        self.token = answer.json()['iamToken']
+        try:
+            self.token = answer.json()['iamToken']
+        except KeyError:
+            raise Exception("Invalid credentials")
 
     def recognize(self, file, folder):
         """
@@ -69,7 +71,6 @@ class ObjectStorage:
         :param aws_secret_access_key: string
         """
 
-        import boto3
         # system("cd ~")
         # system("mkdir .aws")
         # system("echo '[default] \nregion=ru-central1' > .aws/config")
@@ -173,6 +174,12 @@ class RecognizeLongAudio:
 
 class SynthesizeAudio:
     def __init__(self, key, catalogId):
+        """
+        Synthesize speech from text
+        :param key: string yandex ApiKey
+        :param catalogId: string yandex CatalogId
+        """
+
         url = "https://iam.api.cloud.yandex.net/iam/v1/tokens"
         data = {"yandexPassportOauthToken": key}
         answer = requests.post(url, json=data)
@@ -180,7 +187,8 @@ class SynthesizeAudio:
         self.token = answer.json()['iamToken']
         self.catalogId = catalogId
 
-    def __synthesizeStream__(self, text, lpcm):
+    def __synthesizeStream__(
+            self, text, lpcm, voice, sampleRateHertz, stream=True):
         url = 'https://tts.api.cloud.yandex.net/speech/v1/tts:synthesize'
         headers = {
             'Authorization': 'Bearer ' + self.token,
@@ -190,34 +198,48 @@ class SynthesizeAudio:
             'text': text,
             'lang': 'ru-RU',
             'folderId': self.catalogId,
-            'voice': 'alena',
+            'voice': voice,
         }
 
         if lpcm:
             data['format'] = 'lpcm',
-            data['sampleRateHertz'] = 48000,
+            data['sampleRateHertz'] = sampleRateHertz,
 
-        with requests.post(url, headers=headers, data=data, stream=True) as resp:
+        if stream:
+            with requests.post(
+                    url, headers=headers, data=data, stream=True) as resp:
+                if resp.status_code != 200:
+                    raise RuntimeError(
+                        "Invalid response received: code: %d, message: %s" % (
+                            resp.status_code, resp.text))
+
+                for chunk in resp.iter_content(chunk_size=None):
+                    yield chunk
+
+        else:
+            resp = requests.post(url, headers=headers, data=data, stream=True)
             if resp.status_code != 200:
-                raise RuntimeError(
-                    "Invalid response received: code: %d, message: %s" % (
-                        resp.status_code, resp.text))
+                    raise RuntimeError(
+                        "Invalid response received: code: %d, message: %s" % (
+                            resp.status_code, resp.text))
+            resp.raw.decode_content = True
+            return resp.content
 
-            for chunk in resp.iter_content(chunk_size=None):
-                yield chunk
-
-    def synthesize(self, text, filepath, lpcm=False):
+    def synthesize(
+            self, text, filepath,
+            lpcm=False, voice='alena', sampleRateHertz=48000):
         with open(filepath, "wb") as f:
-            for audio_content in self.__synthesizeStream__(text, lpcm):
+            for audio_content in self.__synthesizeStream__(
+                    text, lpcm, voice, sampleRateHertz):
                 f.write(audio_content)
 
-    def synthesize_stream(self, text, lpcm=False):
+    def synthesize_stream(
+            self, text, lpcm=False, voice='alena', sampleRateHertz=48000):
         """
         :param io_stream: byttesIO object
         :param lpcm: bool if True answer will be 48000/16 lpcm data or OOGopus if False
         """
-        audio_data = BytesIO()
-        for audio_content in self.__synthesizeStream__(text, lpcm):
-            audio_data.write(audio_content)
+        audio_data = self.__synthesizeStream__(
+                text, lpcm, voice, sampleRateHertz, stream=False)
 
         return audio_data

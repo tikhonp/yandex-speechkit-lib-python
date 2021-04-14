@@ -22,7 +22,7 @@ sudo python setup.py install
 Import:
 
 ```python3
-import speechkit
+from speechkit import speechkit
 ```
 
 #### For short audio
@@ -61,3 +61,24 @@ There is also supporting removing files by command rm <filename>
 out = speechkit.removefile(inputfile)
 ```
  They return '0', if process was done successfully
+
+#### For synthesis
+
+Init:
+
+```python3
+synthesizeAudio = speechkit.SynthesizeAudio(apiKey, catalogId
+```
+Use token and catalogID for getting iam
+
+Synthesize and save to file
+
+```python3
+synthesizeAudio.synthesize(text, filepath, lpcm=False, voice='alena')
+```
+
+Synthesize and get bufferio data
+
+```python3
+data = synthesizeAudio.synthesize_stream(text, lpcm=False, voice='alena')
+```
