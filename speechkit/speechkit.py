@@ -71,10 +71,6 @@ class ObjectStorage:
         :param aws_secret_access_key: string
         """
 
-        # system("cd ~")
-        # system("mkdir .aws")
-        # system("echo '[default] \nregion=ru-central1' > .aws/config")
-        # system("echo '[default] \naws_access_key_id = {} \naws_secret_access_key = {}' > .aws/credentials".format(aws_access_key_id, aws_secret_access_key))
         session = boto3.session.Session()
         self.s3 = session.client(
             service_name='s3',
@@ -205,33 +201,21 @@ class SynthesizeAudio:
             data['format'] = 'lpcm',
             data['sampleRateHertz'] = sampleRateHertz,
 
-        if stream:
-            with requests.post(
-                    url, headers=headers, data=data, stream=True) as resp:
-                if resp.status_code != 200:
-                    raise RuntimeError(
-                        "Invalid response received: code: %d, message: %s" % (
-                            resp.status_code, resp.text))
-
-                for chunk in resp.iter_content(chunk_size=None):
-                    yield chunk
-
-        else:
-            resp = requests.post(url, headers=headers, data=data, stream=True)
-            if resp.status_code != 200:
-                    raise RuntimeError(
-                        "Invalid response received: code: %d, message: %s" % (
-                            resp.status_code, resp.text))
-            resp.raw.decode_content = True
-            return resp.content
+        resp = requests.post(url, headers=headers, data=data, stream=True)
+        if resp.status_code != 200:
+            raise RuntimeError(
+                "Invalid response received: code: %d, message: %s" % (
+                    resp.status_code, resp.text))
+        resp.raw.decode_content = True
+        return resp.content
 
     def synthesize(
             self, text, filepath,
             lpcm=False, voice='alena', sampleRateHertz=48000):
         with open(filepath, "wb") as f:
-            for audio_content in self.__synthesizeStream__(
-                    text, lpcm, voice, sampleRateHertz):
-                f.write(audio_content)
+            audio_data = self.__synthesizeStream__(
+                text, lpcm, voice, sampleRateHertz)
+            f.write(audio_data)
 
     def synthesize_stream(
             self, text, lpcm=False, voice='alena', sampleRateHertz=48000):
@@ -240,6 +224,6 @@ class SynthesizeAudio:
         :param lpcm: bool if True answer will be 48000/16 lpcm data or OOGopus if False
         """
         audio_data = self.__synthesizeStream__(
-                text, lpcm, voice, sampleRateHertz, stream=False)
+                text, lpcm, voice, sampleRateHertz)
 
         return audio_data

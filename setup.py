@@ -5,7 +5,7 @@ with open("README.md", "r") as f:
 
 setup(
     name="speechkit",
-    version="1.2.0",
+    version="1.2.1",
     description="It's lib for using speechkit api by yandex.",
     license="MIT",
     long_description=long_description,
