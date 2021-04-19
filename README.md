@@ -8,12 +8,12 @@ speechkit
 ## Install
 
 ```
-pip install git+https://github.com/TikhonP/speechkit-lib-python.git
+pip install git+https://github.com/TikhonP/yandex-speechkit-lib-python.git
 ```
 or
 
 ```
-git clone https://github.com/TikhonP/speechkit-lib-python.git
+git clone https://github.com/TikhonP/yandex-speechkit-lib-python.git
 sudo python setup.py install
 ```
  
