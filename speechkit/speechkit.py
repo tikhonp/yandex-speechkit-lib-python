@@ -14,7 +14,7 @@ class RecognizeShortAudio:
         except KeyError:
             raise Exception("Invalid credentials")
 
-    def recognize(self, file, folder):
+    def recognize(self, file, folder, sampleRateHertz=48000):
         """
         Recognizes audio file
         :param file: string, path to audio file OOGopus format
@@ -28,7 +28,7 @@ class RecognizeShortAudio:
             'lang': 'ru-RU',
             'folderId': folder,
             'format': 'lpcm',
-            'sampleRateHertz': 48000,
+            'sampleRateHertz': sampleRateHertz,
         }
 
         answer = requests.post(url, params=params, data=file, headers=headers)
@@ -134,7 +134,8 @@ class RecognizeLongAudio:
         :param filelink: string
         """
 
-        POST = "https://transcribe.api.cloud.yandex.net/speech/stt/v2/longRunningRecognize"
+        POST = "https://transcribe.api.cloud.yandex.net/" \
+            "speech/stt/v2/longRunningRecognize"
         body = {
             "config": {
                 "specification": {
@@ -221,7 +222,8 @@ class SynthesizeAudio:
             self, text, lpcm=False, voice='alena', sampleRateHertz=48000):
         """
         :param io_stream: byttesIO object
-        :param lpcm: bool if True answer will be 48000/16 lpcm data or OOGopus if False
+        :param lpcm: bool if True answer will be 48000/16 lpcm data
+                                                    or OOGopus if False
         """
         audio_data = self.__synthesizeStream__(
                 text, lpcm, voice, sampleRateHertz)
