@@ -6,36 +6,32 @@ import json
 
 script, filename, outfilename, baketname = argv
 
-objstrname = 'output' + str(str(str(datetime.now()).split(sep=' ')[1]).split(sep='.')[1]) + '.opus'
-if speechkit.recode(filename, objstrname)!=0:
-    raise Exception('RecoderingError')
+objstrname = 'output_' + filename.split('/')[-1]
 
 api_id = # your api id here
 api_key = # your api key here
 
-objectStorage = speechkit.objectStorage(api_id, api_key)
-objectStorage.upload_file(objstrname, baketname, objstrname)
+objectStorage = speechkit.ObjectStorage(
+    aws_access_key_id=api_id, aws_secret_access_key=api_key)
+objectStorage.upload_file(filename, baketname, objstrname)
 urltofile = objectStorage.create_presigned_url(baketname, objstrname)
 
 
 apiKey = # your api key here
 
-recognizeLongAudio = speechkit.recognizeLongAudio(apiKey)
-recognizeLongAudio.recognize_post(urltofile)
+recognizeLongAudio = speechkit.RecognizeLongAudio(apiKey)
+recognizeLongAudio.send_for_recognition(urltofile)
 
 while True:
     sleep(2)
-    if recognizeLongAudio.ready_request('j'): break
+    if recognizeLongAudio.get_recognition_results(): break
     print('recognizing ...')
 
-output = recognizeLongAudio.return_json()
+output = recognizeLongAudio.get_data()
 
 with open(outfilename, 'w') as outfile:
     json.dump(output, outfile, ensure_ascii=False, indent=2)
 
+objectStorage.delete_object(objstrname, baketname)
 
-objectStorage.deleteObject(objstrname, baketname)
-
-for file in [filename, objstrname]:
-    if speechkit.removefile(file)!=0:
-        raise Exception('RemovingError')
+print(recognizeLongAudio.get_raw_text())

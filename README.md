@@ -25,7 +25,7 @@ $ python -m pip install .
 python -m pip install speechkit
 ```
 
-## Using speechkit
+## Using speechkit 
 
 There are support of recognizing long and short audio and synthesis. For more information please read docs below. 
 
@@ -53,7 +53,7 @@ From a Python interpreter:
 
 Read documentation for more methods
 
-# speechkit documantation
+# Speechkit documentation
 
 ## Module contents
 
@@ -67,6 +67,19 @@ Bases: `object`
 Interact with AWS object storage.
 
 
+* **Parameters**
+
+    
+    * **aws_access_key_id** (*string*) – The access key to use when creating the client.  This is entirely optional, and if not provided, the credentials configured for the session will automatically be used.  You only need to provide this argument if you want to override the credentials used for this specific client.
+
+
+    * **aws_secret_access_key** (*string*) – The secret key to use when creating the client.  Same semantics as aws_access_key_id above.
+
+
+    * **aws_session_token** (*string*) – The session token to use when creating the client.  Same semantics as aws_access_key_id above.
+
+
+
 #### create_presigned_url(bucket_name, aws_file_name, expiration=3600)
 Generate a presigned URL to share an S3 object
 
@@ -77,8 +90,7 @@ Generate a presigned URL to share an S3 object
     * **aws_file_name** (*string*) – Name of file in object storage
 
 
-    * **expiration** (*integer*) – Time in seconds
-    for the presigned URL to remain valid
+    * **expiration** (*integer*) – Time in seconds for the presigned URL to remain valid
 
 
 
@@ -131,9 +143,6 @@ To recognize long audio fragments, you need to execute 2 requests:
 
     * Get recognition results.
 
-
-* **Example**
-
     ```python
     >>> recognizeLongAudio = RecognizeLongAudio('<Api-Key>')
     >>> recognizeLongAudio.send_for_recognition('<object storage uri>')
@@ -143,6 +152,14 @@ To recognize long audio fragments, you need to execute 2 requests:
     >>> recognizeLongAudio.get_raw_text()
     'raw recognized text'
     ```
+
+Initialize Api-Key for recognizing long audio
+
+
+* **Parameters**
+
+    **api_key** (*string*) – The API key is a private key used for simplified
+    authorization in the Yandex.Cloud API.
 
 
 
@@ -156,28 +173,30 @@ Contain a list of recognition results (chunks[]).
 * **Returns**
 
     Each result in the chunks[] list contains the following fields:
-    \* alternatives[]: List of recognized text alternatives. Each alternative contains the following fields:
+
+
+    * alternatives[]: List of recognized text alternatives. Each alternative contains the following fields:
 
     > 
-    > * words[]: List of recognized words:
+    >     * words[]: List of recognized words:
 
     > > 
-    > >     * startTime: Time stamp of the beginning of the word in the recording. An error of 1-2 seconds is possible.
+    > >         * startTime: Time stamp of the beginning of the word in the recording. An error of 1-2 seconds is possible.
 
 
-    > >     * endTime: Time stamp of the end of the word. An error of 1-2 seconds is possible.
+    > >         * endTime: Time stamp of the end of the word. An error of 1-2 seconds is possible.
 
 
-    > >     * word: Recognized word. Recognized numbers are written in words (for example, twelve rather than 12).
+    > >         * word: Recognized word. Recognized numbers are written in words (for example, twelve rather than 12).
 
 
-    > >     * confidence: This field currently isn’t supported. Don’t use it.
+    > >         * confidence: This field currently isn’t supported. Don’t use it.
 
 
-    > >     * text: Full recognized text. By default, numbers are written in figures. To output the entire text in words, specify true in the raw_results field.
+    > >         * text: Full recognized text. By default, numbers are written in figures. To output the entire text in words, specify true in the raw_results field.
 
 
-    > >     * confidence: This field currently isn’t supported. Don’t use it.
+    > >         * confidence: This field currently isn’t supported. Don’t use it.
 
 
     * channelTag: Audio channel that recognition was performed for.
@@ -254,8 +273,7 @@ Send a file for recognition
 ### class speechkit.RecognizeShortAudio(yandex_passport_oauth_token)
 Bases: `object`
 
-Short audio recognition ensures fast response time
-and is suitable for single-channel audio of small length.
+Short audio recognition ensures fast response time and is suitable for single-channel audio of small length.
 
 Audio requirements:
 
@@ -268,6 +286,14 @@ Audio requirements:
 
     * Maximum number of audio channels: 1.
 
+Gets IAM token and stores in RecognizeShortAudio.token
+
+
+* **Parameters**
+
+    **yandex_passport_oauth_token** (*string*) – OAuth token from Yandex.OAuth
+
+
 
 #### recognize(data, \*\*kwargs)
 Recognize text from BytesIO data given, which is audio
@@ -279,23 +305,19 @@ Recognize text from BytesIO data given, which is audio
     * **data** (*io.BytesIO*) – Data with audio samples to recognize
 
 
-    * **lang** (*string*) – The language to use for recognition.
-    Acceptable values:
+    * **lang** (*string*) – The language to use for recognition. Acceptable values:
     \* ru-RU (by default) — Russian.
     \* en-US — English.
     \* tr-TR — Turkish.
 
 
-    * **topic** (*string*) – The language model to be used for recognition.
-    Default value: general.
+    * **topic** (*string*) – The language model to be used for recognition. Default value: general.
 
 
-    * **profanityFilter** (*boolean*) – This parameter controls the profanity filter
-    in recognized speech.
+    * **profanityFilter** (*boolean*) – This parameter controls the profanity filter in recognized speech.
 
 
-    * **format** (*string*) – The format of the submitted audio.
-    Acceptable values:
+    * **format** (*string*) – The format of the submitted audio. Acceptable values:
     \* lpcm — LPCM with no WAV header.
     \* oggopus (default) — OggOpus.
 
@@ -307,9 +329,7 @@ Recognize text from BytesIO data given, which is audio
     \* 8000 — Sampling rate of 8 kHz.
 
 
-    * **folderId** (*string*) – ID of the folder that you have access to.
-    Don’t specify this field if you make a request on behalf of
-    a service account.
+    * **folderId** (*string*) – ID of the folder that you have access to. Don’t specify this field if you make a request on behalf of a service account.
 
 
 
@@ -323,6 +343,12 @@ Recognize text from BytesIO data given, which is audio
 Bases: `object`
 
 Generates speech from received text.
+
+
+* **Parameters**
+
+    **yandex_passport_oauth_token** (*string*) – OAuth token from Yandex.OAuth
+
 
 
 #### synthesize(file_path, \*\*kwargs)
@@ -385,8 +411,7 @@ Generates speech from received text and saves it to file
 
 
 
-    * **sampleRateHertz** (*string*) – The sampling frequency of the synthesized audio.
-    Used if format is set to lpcm. Acceptable values:
+    * **sampleRateHertz** (*string*) – The sampling frequency of the synthesized audio. Used if format is set to lpcm. Acceptable values:
     \* 48000 (default): Sampling rate of 48 kHz.
     \* 16000: Sampling rate of 16 kHz.
     \* 8000: Sampling rate of 8 kHz.
