@@ -19,7 +19,7 @@ $ virtualenv venv
 ...
 $ . venv/bin/activate
 $ python -m pip install -r requirements.txt
-$ python -m pip install -e .
+$ python -m pip install .
 ```
 ```bash
 python -m pip install speechkit
