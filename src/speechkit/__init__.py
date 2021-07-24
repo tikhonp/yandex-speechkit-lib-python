@@ -8,7 +8,7 @@ import boto3
 import requests
 
 __author__ = 'Tikhon Petrishchev'
-__version__ = '1.3.4'
+__version__ = '1.3.5'
 
 
 class InvalidDataError(ValueError):
@@ -20,8 +20,8 @@ class RequestError(Exception):
     """Exception raised for errors while yandex api request"""
 
     def __init__(self, answer: dict):
-        self.code = answer.get('error_code')
-        self.message = answer.get('error_message')
+        self.code = str(answer.get('code', '')) + str(answer.get('error_code', ''))
+        self.message = str(answer.get('message')) + str(answer.get('error_message', ''))
         super().__init__(self.code + ' ' + self.message)
 
 
@@ -355,7 +355,7 @@ class SynthesizeAudio:
         answer = requests.post(url, json=data)
 
         if answer.ok:
-            self.token = answer.get('iamToken')
+            self.token = answer.json().get('iamToken')
         else:
             raise RequestError(answer.json())
 
