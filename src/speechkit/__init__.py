@@ -2,11 +2,27 @@
 Python SDK for using Yandex Speech recognition and synthesis
 """
 
-import requests
+import sys
+
 import boto3
+import requests
 
 __author__ = 'Tikhon Petrishchev'
-__version__ = '1.3.1'
+__version__ = '1.3.3'
+
+
+class InvalidDataError(ValueError):
+    """Exception raised for errors when data not valid"""
+    pass
+
+
+class RequestError(Exception):
+    """Exception raised for errors while yandex api request"""
+
+    def __init__(self, answer: dict):
+        self.code = answer.get('error_code')
+        self.message = answer.get('error_message')
+        super().__init__(self.code + ' ' + self.message)
 
 
 class RecognizeShortAudio:
@@ -19,7 +35,6 @@ class RecognizeShortAudio:
         * Maximum number of audio channels: 1.
 
     """
-    # TODO: Add checking with this parametrs
 
     def __init__(self, yandex_passport_oauth_token):
         """Gets IAM token and stores in `RecognizeShortAudio.token`
@@ -29,14 +44,13 @@ class RecognizeShortAudio:
         """
 
         url = "https://iam.api.cloud.yandex.net/iam/v1/tokens"
-        data = {"yandexPassportOauthToken": yandex_passport_oauth_token}
-        answer = requests.post(url, json=data).json()
+        data = {'yandexPassportOauthToken': str(yandex_passport_oauth_token)}
+        answer = requests.post(url, json=data)
 
-        try:
-            self.token = answer['iamToken']
-        except KeyError:
-            raise ValueError("Invalid 'yandex_passport_oauth_token', "
-                             "oringinal exception: '{}'".format(answer))
+        if answer.ok:
+            self.token = answer.json().get('iamToken')
+        else:
+            raise RequestError(answer.json())
 
     def recognize(self, data, **kwargs):
         """
@@ -69,35 +83,47 @@ class RecognizeShortAudio:
             * `16000` — Sampling rate of 16 kHz.
             * `8000` — Sampling rate of 8 kHz.
 
-        :type folderId: string
-        :param folderId: ID of the folder that you have access to. Don't specify this field if you make a request on behalf of a service account.
+        :type folderId: string :param folderId: ID of the folder that you have access to. Don't specify this field if 
+        you make a request on behalf of a service account. 
 
         :return: The recognized text, string
         """
+
+        if sys.getsizeof(data) > 1024 * 1024:
+            raise InvalidDataError("Maximum file size: 1 MB. Got {} bytes.".format(sys.getsizeof(data)))
+
+        if kwargs.get('format') == 'lpcm':
+            sample_rate_hertz = int(kwargs.get('sampleRateHertz', '48000'))
+            seconds_duration = (sys.getsizeof(data) * 8) / (sample_rate_hertz * 1 * 16)
+
+            if seconds_duration > 30:
+                raise InvalidDataError(
+                    "Maximum length: 30 seconds. Maximum number of audio channels: 1. Calculated length - {}".format(
+                        seconds_duration))
 
         url = 'https://stt.api.cloud.yandex.net/speech/v1/stt:recognize'
         headers = {'Authorization': 'Bearer {}'.format(self.token)}
 
         answer = requests.post(url, params=kwargs, data=data, headers=headers)
 
-        if answer.status_code != 200:
-            raise Exception(
-                "It's error when recognizing: '{}'".format(answer.json()))
+        if answer.ok:
+            return answer.json().get('result')
         else:
-            return answer.json()['result']
+            raise RequestError(answer.json())
 
 
 class ObjectStorage:
     """Interact with AWS object storage.
 
-    :type aws_access_key_id: string
-    :param aws_access_key_id: The access key to use when creating the client.  This is entirely optional, and if not provided, the credentials configured for the session will automatically be used.  You only need to provide this argument if you want to override the credentials used for this specific client.
+    :type aws_access_key_id: string :param aws_access_key_id: The access key to use when creating the client.  This
+    is entirely optional, and if not provided, the credentials configured for the session will automatically be used.
+     You only need to provide this argument if you want to override the credentials used for this specific client.
 
-    :type aws_secret_access_key: string
-    :param aws_secret_access_key: The secret key to use when creating the client.  Same semantics as aws_access_key_id above.
+    :type aws_secret_access_key: string :param aws_secret_access_key: The secret key to use when creating the client.
+     Same semantics as aws_access_key_id above.
 
-    :type aws_session_token: string
-    :param aws_session_token: The session token to use when creating the client.  Same semantics as aws_access_key_id above.
+    :type aws_session_token: string :param aws_session_token: The session token to use when creating the client.
+    Same semantics as aws_access_key_id above.
     """
 
     def __init__(self, **kwargs):
@@ -108,32 +134,32 @@ class ObjectStorage:
             **kwargs
         )
 
-    def upload_file(self, file_path, baketname, aws_file_name):
+    def upload_file(self, file_path, baket_name, aws_file_name):
         """Upload a file to object storage
 
         :type file_path: string
         :param file_path: Path to input file
-        :type baketname: string
+        :type baket_name: string
         :type aws_file_name: string
         :param aws_file_name: Name of file in object storage
         """
-        return self.s3.upload_file(file_path, baketname, aws_file_name)
+        return self.s3.upload_file(file_path, baket_name, aws_file_name)
 
-    def list_objects_in_bucket(self, bucketname):
+    def list_objects_in_bucket(self, bucket_name):
         """Get list of all objects in backet"""
 
-        return self.s3.list_objects(Bucket=bucketname)
+        return self.s3.list_objects(Bucket=bucket_name)
 
-    def delete_object(self, aws_file_name, bucketname):
+    def delete_object(self, aws_file_name, bucket_name):
         """Delete object in bucket
 
         :type aws_file_name: string
         :param aws_file_name: Name of file in object storage
-        :type bucketname: string
+        :type bucket_name: string
         """
 
         return self.s3.delete_objects(
-            Bucket=bucketname, Delete={'Objects': [{'Key': aws_file_name}]})
+            Bucket=bucket_name, Delete={'Objects': [{'Key': aws_file_name}]})
 
     def create_presigned_url(self, bucket_name, aws_file_name,
                              expiration=3600):
@@ -147,7 +173,7 @@ class ObjectStorage:
         :type expiration: integer
         :param expiration: Time in seconds for the presigned URL to remain valid
 
-        :return: Presigned URL as string.
+        :return: Resigned URL as string.
         """
 
         return self.s3.generate_presigned_url(
@@ -185,6 +211,8 @@ class RecognizeLongAudio:
 
         self.api_key = api_key
         self.header = {'Authorization': 'Api-Key {}'.format(self.api_key)}
+        self.id = None
+        self.answer_data = None
 
     def send_for_recognition(self, uri, **kwargs):
         """Send a file for recognition
@@ -229,7 +257,7 @@ class RecognizeLongAudio:
         """
 
         url = "https://transcribe.api.cloud.yandex.net/" \
-            "speech/stt/v2/longRunningRecognize"
+              "speech/stt/v2/longRunningRecognize"
         data = {
             "config": {
                 "specification": {
@@ -240,8 +268,11 @@ class RecognizeLongAudio:
                 "uri": uri
             }
         }
-        answer = requests.post(url, headers=self.header, json=data).json()
-        self.id = answer['id']
+        answer = requests.post(url, headers=self.header, json=data)
+        if answer.ok:
+            self.id = answer.json().get('id')
+        else:
+            raise RequestError(answer.json())
 
     def get_recognition_results(self):
         """Monitor the recognition results using the received ID.
@@ -250,14 +281,20 @@ class RecognizeLongAudio:
         to recognize 1 minute of single-channel audio.
         """
 
-        url = "https://operation.api.cloud.yandex.net/operations/{id}"
-        self.answer = requests.get(
-            url.format(id=self.id), headers=self.header).json()
-        return self.answer['done']
+        if self.id is None:
+            raise RuntimeError("You must send for recognition first.")
+
+        url = "https://operation.api.cloud.yandex.net/operations/{id}".format(id=self.id)
+        self.answer_data = requests.get(url, headers=self.header)
+        if self.answer_data.ok:
+            self.answer_data = self.answer_data.json()
+            return self.answer_data.get('done')
+        else:
+            raise RequestError(self.answer_data.json())
 
     def get_data(self):
         """Get the response.
-        Use :meth:`RecognizeLongAudio.get_recognition_results` first to store answer
+        Use :meth:`RecognizeLongAudio.get_recognition_results` first to store answer_data
 
         Contain a list of recognition results (`chunks[]`).
 
@@ -267,32 +304,39 @@ class RecognizeLongAudio:
 
                 * `words[]`: List of recognized words:
 
-                    * `startTime`: Time stamp of the beginning of the word in the recording. An error of 1-2 seconds is possible.
+                    * `startTime`: Time stamp of the beginning of the word in the recording. An error of 1-2 seconds
+                    is possible.
 
                     * `endTime`: Time stamp of the end of the word. An error of 1-2 seconds is possible.
 
-                    * `word`: Recognized word. Recognized numbers are written in words (for example, twelve rather than 12).
+                    * `word`: Recognized word. Recognized numbers are written in words (for example, twelve rather
+                    than 12).
 
                     * `confidence`: This field currently isn't supported. Don't use it.
 
-                    * `text`: Full recognized text. By default, numbers are written in figures. To output the entire text in words, specify true in the raw_results field.
+                    * `text`: Full recognized text. By default, numbers are written in figures. To output the entire
+                    text in words, specify true in the raw_results field.
 
                     * `confidence`: This field currently isn't supported. Don't use it.
 
             * `channelTag`: Audio channel that recognition was performed for.
         """
-        if not hasattr(self, 'answer'):
+
+        if self.answer_data is None:
             raise ValueError("You must call 'get_recognition_results' first")
-        return self.answer['results']
+        return self.answer_data.get('results')
 
     def get_raw_text(self):
-        """Get raw text from answer data
+        """Get raw text from answer_data data
 
         :return: Text
         """
 
+        if self.answer_data is None:
+            raise ValueError("You must call 'get_recognition_results' first")
+
         text = ''
-        for chunk in self.answer['response']['chunks']:
+        for chunk in self.answer_data.get('response', {}).get('chunks'):
             text += chunk['alternatives'][0]['text']
         return text
 
@@ -308,27 +352,24 @@ class SynthesizeAudio:
 
         url = "https://iam.api.cloud.yandex.net/iam/v1/tokens"
         data = {"yandexPassportOauthToken": yandex_passport_oauth_token}
-        answer = requests.post(url, json=data).json()
+        answer = requests.post(url, json=data)
 
-        try:
-            self.token = answer['iamToken']
-        except KeyError:
-            raise ValueError("Invalid 'yandex_passport_oauth_token', "
-                             "oringinal exception: '{}'".format(answer))
+        if answer.ok:
+            self.token = answer.get('iamToken')
+        else:
+            raise RequestError(answer.json())
 
     def _synthesize_stream(self, **kwargs):
         """Creates request to generate speech from text"""
 
         url = 'https://tts.api.cloud.yandex.net/speech/v1/tts:synthesize'
-        headers = {
-            'Authorization': 'Bearer ' + self.token,
-        }
+        headers = {'Authorization': 'Bearer ' + self.token}
 
         answer = requests.post(url, headers=headers, data=kwargs, stream=True)
-        if answer.status_code != 200:
-            raise RuntimeError(
-                "Invalid response received: code: %d, message: %s" % (
-                    answer.status_code, answer.text))
+
+        if not answer.ok:
+            raise RequestError(answer.json())
+
         answer.raw.decode_content = True
         return answer.content
 
@@ -377,13 +418,12 @@ class SynthesizeAudio:
                 * Byte order — Reversed (little-endian).
                 * Audio data is stored as signed integers.
 
-            * `oggopus` (default) — Data in the audio file is encoded using the OPUS audio codec and compressed using the OGG container format (OggOpus).
+            * `oggopus` (default) — Data in the audio file is encoded using the OPUS audio codec and compressed using
+            the OGG container format (OggOpus).
 
-        :type sampleRateHertz: string
-        :param sampleRateHertz: The sampling frequency of the synthesized audio. Used if format is set to lpcm. Acceptable values:
-            * `48000` (default): Sampling rate of 48 kHz.
-            * `16000`: Sampling rate of 16 kHz.
-            * `8000`: Sampling rate of 8 kHz.
+        :type sampleRateHertz: string :param sampleRateHertz: The sampling frequency of the synthesized audio. Used
+        if format is set to lpcm. Acceptable values: * `48000` (default): Sampling rate of 48 kHz. * `16000`:
+        Sampling rate of 16 kHz. * `8000`: Sampling rate of 8 kHz.
 
         :type folderId: string
         :param folderId: ID of the folder that you have access to.
@@ -392,7 +432,7 @@ class SynthesizeAudio:
         """
 
         if 'text' in kwargs and len(kwargs.get('text', '')) > 5000:
-            raise ValueError("Text must be less than 5000 characters")
+            raise InvalidDataError("Text must be less than 5000 characters")
 
         with open(file_path, "wb") as f:
             audio_data = self._synthesize_stream(**kwargs)
@@ -441,7 +481,8 @@ class SynthesizeAudio:
                 * Byte order — Reversed (little-endian).
                 * Audio data is stored as signed integers.
 
-            * `oggopus` (default) — Data in the audio file is encoded using the OPUS audio codec and compressed using the OGG container format (OggOpus).
+            * `oggopus` (default) — Data in the audio file is encoded using the OPUS audio codec and compressed using
+            the OGG container format (OggOpus).
 
         :type sampleRateHertz: string
         :param sampleRateHertz: The sampling frequency of the synthesized audio.

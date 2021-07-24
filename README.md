@@ -10,7 +10,7 @@ speechkit
 
 # Getting Started
 
-Assuming that you have Python and `virtualenv` installed, set up your environment and install the required dependencies like this or you can install the library using `pip`:
+Assuming that you have Python and `virtualenv` installed, set up your environment and install the required dependencies like this, or you can install the library using `pip`:
 
 ```bash
 $ git clone https://github.com/TikhonP/yandex-speechkit-lib-python.git
@@ -61,23 +61,22 @@ speechkit
 Python SDK for using Yandex Speech recognition and synthesis
 
 
+### exception speechkit.InvalidDataError()
+Bases: `ValueError`
+
+Exception raised for errors when data not valid
+
+
 ### class speechkit.ObjectStorage(\*\*kwargs)
 Bases: `object`
 
 Interact with AWS object storage.
 
+is entirely optional, and if not provided, the credentials configured for the session will automatically be used.
 
-* **Parameters**
+    You only need to provide this argument if you want to override the credentials used for this specific client.
 
-    
-    * **aws_access_key_id** (*string*) – The access key to use when creating the client.  This is entirely optional, and if not provided, the credentials configured for the session will automatically be used.  You only need to provide this argument if you want to override the credentials used for this specific client.
-
-
-    * **aws_secret_access_key** (*string*) – The secret key to use when creating the client.  Same semantics as aws_access_key_id above.
-
-
-    * **aws_session_token** (*string*) – The session token to use when creating the client.  Same semantics as aws_access_key_id above.
-
+Same semantics as aws_access_key_id above.
 
 
 #### create_presigned_url(bucket_name, aws_file_name, expiration=3600)
@@ -96,11 +95,11 @@ Generate a presigned URL to share an S3 object
 
 * **Returns**
 
-    Presigned URL as string.
+    Resigned URL as string.
 
 
 
-#### delete_object(aws_file_name, bucketname)
+#### delete_object(aws_file_name, bucket_name)
 Delete object in bucket
 
 
@@ -110,11 +109,11 @@ Delete object in bucket
 
 
 
-#### list_objects_in_bucket(bucketname)
+#### list_objects_in_bucket(bucket_name)
 Get list of all objects in backet
 
 
-#### upload_file(file_path, baketname, aws_file_name)
+#### upload_file(file_path, baket_name, aws_file_name)
 Upload a file to object storage
 
 
@@ -165,7 +164,7 @@ Initialize Api-Key for recognizing long audio
 
 #### get_data()
 Get the response.
-Use `RecognizeLongAudio.get_recognition_results()` first to store answer
+Use `RecognizeLongAudio.get_recognition_results()` first to store answer_data
 
 Contain a list of recognition results (chunks[]).
 
@@ -181,19 +180,25 @@ Contain a list of recognition results (chunks[]).
     >     * words[]: List of recognized words:
 
     > > 
-    > >         * startTime: Time stamp of the beginning of the word in the recording. An error of 1-2 seconds is possible.
+    > >         * startTime: Time stamp of the beginning of the word in the recording. An error of 1-2 seconds
+
+    > > is possible.
 
 
     > >         * endTime: Time stamp of the end of the word. An error of 1-2 seconds is possible.
 
 
-    > >         * word: Recognized word. Recognized numbers are written in words (for example, twelve rather than 12).
+    > >         * word: Recognized word. Recognized numbers are written in words (for example, twelve rather
+
+    > > than 12).
 
 
     > >         * confidence: This field currently isn’t supported. Don’t use it.
 
 
-    > >         * text: Full recognized text. By default, numbers are written in figures. To output the entire text in words, specify true in the raw_results field.
+    > >         * text: Full recognized text. By default, numbers are written in figures. To output the entire
+
+    > > text in words, specify true in the raw_results field.
 
 
     > >         * confidence: This field currently isn’t supported. Don’t use it.
@@ -205,7 +210,7 @@ Contain a list of recognition results (chunks[]).
 
 
 #### get_raw_text()
-Get raw text from answer data
+Get raw text from answer_data data
 
 
 * **Returns**
@@ -286,12 +291,12 @@ Audio requirements:
 
     * Maximum number of audio channels: 1.
 
-Gets IAM token and stores in RecognizeShortAudio.token
+Gets IAM token and stores in `RecognizeShortAudio.token`
 
 
 * **Parameters**
 
-    **yandex_passport_oauth_token** (*string*) – OAuth token from Yandex.OAuth
+    **yandex_passport_oauth_token** (*string*) – OAuth token from `Yandex.OAuth`
 
 
 
@@ -329,14 +334,19 @@ Recognize text from BytesIO data given, which is audio
     \* 8000 — Sampling rate of 8 kHz.
 
 
-    * **folderId** (*string*) – ID of the folder that you have access to. Don’t specify this field if you make a request on behalf of a service account.
-
+you make a request on behalf of a service account.
 
 
 * **Returns**
 
     The recognized text, string
 
+
+
+### exception speechkit.RequestError(answer: dict)
+Bases: `Exception`
+
+Exception raised for errors while yandex api request
 
 
 ### class speechkit.SynthesizeAudio(yandex_passport_oauth_token)
@@ -347,7 +357,7 @@ Generates speech from received text.
 
 * **Parameters**
 
-    **yandex_passport_oauth_token** (*string*) – OAuth token from Yandex.OAuth
+    **yandex_passport_oauth_token** (*string*) – OAuth token from `Yandex.OAuth`
 
 
 
@@ -407,17 +417,19 @@ Generates speech from received text and saves it to file
     >     * Audio data is stored as signed integers.
 
 
-        * oggopus (default) — Data in the audio file is encoded using the OPUS audio codec and compressed using the OGG container format (OggOpus).
+        * oggopus (default) — Data in the audio file is encoded using the OPUS audio codec and compressed using
+
+    the OGG container format (OggOpus).
 
 
 
-    * **sampleRateHertz** (*string*) – The sampling frequency of the synthesized audio. Used if format is set to lpcm. Acceptable values:
-    \* 48000 (default): Sampling rate of 48 kHz.
-    \* 16000: Sampling rate of 16 kHz.
-    \* 8000: Sampling rate of 8 kHz.
+if format is set to lpcm. Acceptable values: \* 48000 (default): Sampling rate of 48 kHz. \* 16000:
+Sampling rate of 16 kHz. \* 8000: Sampling rate of 8 kHz.
 
 
-    * **folderId** (*string*) – ID of the folder that you have access to.
+* **Parameters**
+
+    **folderId** (*string*) – ID of the folder that you have access to.
     Required for authorization with a user account (see the UserAccount resource).
     Don’t specify this field if you make a request on behalf of a service account.
 
@@ -478,7 +490,9 @@ Generates speech from received text and return io.BytesIO object
     >     * Audio data is stored as signed integers.
 
 
-        * oggopus (default) — Data in the audio file is encoded using the OPUS audio codec and compressed using the OGG container format (OggOpus).
+        * oggopus (default) — Data in the audio file is encoded using the OPUS audio codec and compressed using
+
+    the OGG container format (OggOpus).
 
 
 
