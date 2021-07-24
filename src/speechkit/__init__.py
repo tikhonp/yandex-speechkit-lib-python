@@ -8,7 +8,7 @@ import boto3
 import requests
 
 __author__ = 'Tikhon Petrishchev'
-__version__ = '1.3.3'
+__version__ = '1.3.4'
 
 
 class InvalidDataError(ValueError):
