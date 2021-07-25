@@ -1,6 +1,7 @@
 import unittest
 import io
 import os
+import pathlib
 
 import speechkit
 
@@ -85,6 +86,19 @@ class SynthesizeAudio(unittest.TestCase):
 
         with self.assertRaises(speechkit.RequestError):
             synthesizeAudio.synthesize_stream(text='text', folderId='lol')
+
+    def test_synthesize(self):
+        api_key = os.environ.get('API_KEY')
+        synthesizeAudio = speechkit.SynthesizeAudio(api_key)
+
+        folderId = os.environ.get('CATALOG')
+        self.path = 'tests/test_synth.wav'
+        synthesizeAudio.synthesize(
+            self.path, text='text',
+            voice='oksana', format='lpcm', sampleRateHertz='16000',
+            folderId=folderId
+        )
+        self.assertTrue(pathlib.Path(self.path).resolve().is_file())
 
 
 if __name__ == '__main__':
