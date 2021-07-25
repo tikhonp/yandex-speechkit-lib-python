@@ -8,7 +8,7 @@ import boto3
 import requests
 
 __author__ = 'Tikhon Petrishchev'
-__version__ = '1.3.4'
+__version__ = '1.3.5'
 
 
 class InvalidDataError(ValueError):
@@ -19,10 +19,10 @@ class InvalidDataError(ValueError):
 class RequestError(Exception):
     """Exception raised for errors while yandex api request"""
 
-    def __init__(self, answer: dict):
-        self.code = answer.get('error_code')
-        self.message = answer.get('error_message')
-        super().__init__(self.code + ' ' + self.message)
+    def __init__(self, answer: dict, *args, **kwargs):
+        self.error_code = int(str(answer.get('code', '')) + str(answer.get('error_code', '')))
+        self.message = str(answer.get('message', '')) + str(answer.get('error_message', ''))
+        super().__init__(str(self.error_code) + ' ' + self.message, *args, **kwargs)
 
 
 class RecognizeShortAudio:
@@ -83,8 +83,8 @@ class RecognizeShortAudio:
             * `16000` — Sampling rate of 16 kHz.
             * `8000` — Sampling rate of 8 kHz.
 
-        :type folderId: string :param folderId: ID of the folder that you have access to. Don't specify this field if 
-        you make a request on behalf of a service account. 
+        :type folderId: string :param folderId: ID of the folder that you have access to. Don't specify this field if
+        you make a request on behalf of a service account.
 
         :return: The recognized text, string
         """
@@ -355,7 +355,7 @@ class SynthesizeAudio:
         answer = requests.post(url, json=data)
 
         if answer.ok:
-            self.token = answer.get('iamToken')
+            self.token = answer.json().get('iamToken')
         else:
             raise RequestError(answer.json())
 

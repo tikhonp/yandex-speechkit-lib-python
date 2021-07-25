@@ -1,0 +1,18 @@
+language: python
+python:
+  - 3.5
+  - 3.6
+  - 3.7
+  - 3.8
+  - 3.9
+before_install:
+  - python --version
+  - pip install -U pip
+  - pip install -r requirements.txt
+  - pip install codecov
+install:
+  - pip install ".[test]" . # install package + test dependencies
+script:
+  - python -m unittest tests.test_speechkit # run tests
+after_success:
+  - codecov # submit coverage
