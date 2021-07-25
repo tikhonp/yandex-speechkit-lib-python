@@ -1,6 +1,6 @@
 # Yandex Speechkit Python SDK
 
-![PyPI](https://img.shields.io/pypi/v/speechkit) ![GitHub](https://img.shields.io/github/license/tikhonp/yandex-speechkit-lib-python) ![PyPI - Format](https://img.shields.io/pypi/format/wheel)
+![PyPI](https://img.shields.io/pypi/v/speechkit) ![GitHub](https://img.shields.io/github/license/tikhonp/yandex-speechkit-lib-python) ![PyPI - Format](https://img.shields.io/pypi/format/wheel) [![Build Status](https://travis-ci.com/TikhonP/yandex-speechkit-lib-python.svg?branch=master)](https://travis-ci.com/TikhonP/yandex-speechkit-lib-python)
 
 It's lib for using speechkit api by yandex.
 

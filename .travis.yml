@@ -1,18 +1,21 @@
 language: python
 python:
-  - 3.5
-  - 3.6
-  - 3.7
-  - 3.8
-  - 3.9
+- 3.6
+- 3.7
+- 3.8
+- 3.9
 before_install:
-  - python --version
-  - pip install -U pip
-  - pip install -r requirements.txt
-  - pip install codecov
+- python --version
+- pip install -U pip
+- pip install -r requirements.txt
+- pip install codecov
 install:
-  - pip install ".[test]" . # install package + test dependencies
+- pip install ".[test]" .
 script:
-  - python -m unittest tests.test_speechkit # run tests
+- python -m unittest tests.test_speechkit
 after_success:
-  - codecov # submit coverage
+- codecov
+env:
+  global:
+  - secure: EUNSG7O+j1rpIS7/0K7rGB+q0at0/p8Phvsuz2ZfYw58pmB5bDQ/m/tH6qjeJ+rj4ko/Vv8CpZ+V3XIebBs4E+5js9J3ROInvA+em0mijw1Lph4niqAvda1wRpbIS8DXUgyBeiLILvlxFtnAS0lvFM42mRLYbgEXK2Wtc8VlBKOs431mWjX7cS97CgcbremaxZegOSQ0NTt4or00Wp213Uy74g8U3MRHEp9GmPDnnbYnIY3jl2DUQlZc1C4JIJFigfG6p5fZKGweAv0oBvxHTf7FKyVy2dMfS3MqKq5bJBD5u2oap0GZdwTq+8VV+UK2FtcwBt5k7jBTpZ0i5liRAQSAowRItC1mIfsQt6S/PeG3J2tRfiBA+halbEEIdIA0WSbOSVDokCWoN3YW9M5ThqIu4SHP2VxyTpMb7znyXMU54PpVm7wKnQTrFe9CNQl2KP26Ase2p26ppJuLyY0PG2IyFc4tzPLUWSw9FBiYF/TyD/fQHpVRGKlCGy720tQ+UrxZZr+aTw8svUZEOHidD8GVdIaLVmR32EZbdqCQeSQ5lr5FNxhItd9Inc2dMPyImQapRAGwI6Yf0693NKp+hnJ/u345+/pvoKtY7AyO7OKkj2ot5NZLwi56dMd5Tq91QMUwcsxQ3DrhjjTqq1AJ6pvzZ01i8TCd2ravEMhdVzA=
+  - secure: QeJWiOgj03AxeP6lBuFU5q+L7iCM8c1g3C8r0MNGSVhWr70u8ga7DkmNrpNIASNEmibFUVLfBNYZtBugOgneSLpY909oSJhFaibHH+YmauVMSt2qrizOS1ixW+gux/sxZVRrAdiKCltf43XiBHWz8rcj84bb6WXyS3Qw/G3hc0xWJSpO0WXP9XDrPpRkOtFk7/2IZciFvpHuGCDradcbP5GtltY29cpvRVYYWFelo+5nSZ4SNy7lif94SvnZbJ0IJY4hSy8hZhjFbBPVNqMahBXHENRFRiEgTbS50CXv71y0kGGDN9CwbfKwc90lX+R0C712+ngJ6yQLZf1C+ukI7i5DqZH72xGIKnq5ihJGy1wZYKyPNKW47/sHzFrzx/gKAvrzzHWXR1xj8Xy8wNByxRSbqnhQoBHrGx1ZVSYQREIBSRo36WAkyilzDgXE/UQ4+xTCR4GUYIqpxb/TQKbzPUX1U2P71vnWu79t6E50fPnbEh9srVvh9xDkTaSacc0PMdbxeOC1nSFufmN0j0x+OFmGxJIpkOi6M5xc28lK48epBvvzq3GuIjfdwl3Npt1nRWF4J9YrVbVbN55RxzIF/iPVoID/XLSRVTOKbK1I0M4JVgiqTDvK7ffxoOwx3M9Gm4j4jeTkH8Xy8SFxR6TrVzD4Yd7jBh4iblqMnwtZBOg=

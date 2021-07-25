@@ -1,7 +1,7 @@
 """speechkit
 Python SDK for using Yandex Speech recognition and synthesis
 """
-
+import io
 import sys
 
 import boto3
@@ -20,9 +20,9 @@ class RequestError(Exception):
     """Exception raised for errors while yandex api request"""
 
     def __init__(self, answer: dict, *args, **kwargs):
-        self.error_code = int(str(answer.get('code', '')) + str(answer.get('error_code', '')))
+        self.error_code = str(answer.get('code', '')) + str(answer.get('error_code', ''))
         self.message = str(answer.get('message', '')) + str(answer.get('error_message', ''))
-        super().__init__(str(self.error_code) + ' ' + self.message, *args, **kwargs)
+        super().__init__(self.error_code + ' ' + self.message, *args, **kwargs)
 
 
 class RecognizeShortAudio:
@@ -37,18 +37,19 @@ class RecognizeShortAudio:
     """
 
     def __init__(self, yandex_passport_oauth_token):
-        """Gets IAM token and stores in `RecognizeShortAudio.token`
+        """Gets IAM _token and stores in `RecognizeShortAudio._token`
 
         :type yandex_passport_oauth_token: string
-        :param yandex_passport_oauth_token: OAuth token from Yandex.OAuth
+        :param yandex_passport_oauth_token: OAuth _token from Yandex.OAuth
         """
 
+        self._token = None
         url = "https://iam.api.cloud.yandex.net/iam/v1/tokens"
         data = {'yandexPassportOauthToken': str(yandex_passport_oauth_token)}
         answer = requests.post(url, json=data)
 
         if answer.ok:
-            self.token = answer.json().get('iamToken')
+            self._token = answer.json().get('iamToken')
         else:
             raise RequestError(answer.json())
 
@@ -89,6 +90,11 @@ class RecognizeShortAudio:
         :return: The recognized text, string
         """
 
+        if self._token is None:
+            raise RuntimeError("You must call `RecognizeShortAudio.__init__()` first.")
+
+        assert isinstance(data, (io.BytesIO, bytes))
+
         if sys.getsizeof(data) > 1024 * 1024:
             raise InvalidDataError("Maximum file size: 1 MB. Got {} bytes.".format(sys.getsizeof(data)))
 
@@ -102,7 +108,7 @@ class RecognizeShortAudio:
                         seconds_duration))
 
         url = 'https://stt.api.cloud.yandex.net/speech/v1/stt:recognize'
-        headers = {'Authorization': 'Bearer {}'.format(self.token)}
+        headers = {'Authorization': 'Bearer {}'.format(self._token)}
 
         answer = requests.post(url, params=kwargs, data=data, headers=headers)
 
@@ -122,7 +128,7 @@ class ObjectStorage:
     :type aws_secret_access_key: string :param aws_secret_access_key: The secret key to use when creating the client.
      Same semantics as aws_access_key_id above.
 
-    :type aws_session_token: string :param aws_session_token: The session token to use when creating the client.
+    :type aws_session_token: string :param aws_session_token: The session _token to use when creating the client.
     Same semantics as aws_access_key_id above.
     """
 
@@ -347,7 +353,7 @@ class SynthesizeAudio:
     def __init__(self, yandex_passport_oauth_token):
         """
         :type yandex_passport_oauth_token: string
-        :param yandex_passport_oauth_token: OAuth token from Yandex.OAuth
+        :param yandex_passport_oauth_token: OAuth _token from Yandex.OAuth
         """
 
         url = "https://iam.api.cloud.yandex.net/iam/v1/tokens"
