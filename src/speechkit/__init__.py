@@ -3,17 +3,16 @@ Python SDK for using Yandex Speech recognition and synthesis
 """
 
 __author__ = 'Tikhon Petrishchev'
-__version__ = '1.3.5'
+__version__ = '1.4.0'
 
 import io
 import sys
 import uuid
 from pathlib import Path
+from typing import List
 
 import boto3
 import requests
-
-from typing import List
 
 
 class InvalidDataError(ValueError):
@@ -101,7 +100,13 @@ class RecognizeShortAudio:
 
         :type yandex_passport_oauth_token: string
         :param yandex_passport_oauth_token: OAuth _token from Yandex.OAuth
+        :return: __init__ should return None
+        :rtype: None
         """
+
+        if not type(yandex_passport_oauth_token) is str:
+            raise TypeError("__init__() yandex_passport_oauth_token: got {} but expected \
+                            type is str".format(type(yandex_passport_oauth_token).__name__))
 
         self._headers = {
             'Authorization': 'Bearer {}'.format(get_iam_token(yandex_passport_oauth_token=yandex_passport_oauth_token))
@@ -111,13 +116,16 @@ class RecognizeShortAudio:
         """
         Recognize text from BytesIO data given, which is audio
 
-        :type data: io.BytesIO
+        :type data: io.BytesIO, bytes
         :param data: Data with audio samples to recognize
 
         :type lang: string
         :param lang: The language to use for recognition. Acceptable values:
+
             * `ru-RU` (by default) — Russian.
+
             * `en-US` — English.
+
             * `tr-TR` — Turkish.
 
         :type topic: string
@@ -128,27 +136,38 @@ class RecognizeShortAudio:
 
         :type format: string
         :param format: The format of the submitted audio. Acceptable values:
+
             * `lpcm` — LPCM with no WAV _header.
+
             * `oggopus` (default) — OggOpus.
 
         :type sampleRateHertz: string
         :param sampleRateHertz: The sampling frequency of the submitted audio.
             Used if format is set to lpcm. Acceptable values:
+
             * `48000` (default) — Sampling rate of 48 kHz.
+
             * `16000` — Sampling rate of 16 kHz.
+
             * `8000` — Sampling rate of 8 kHz.
 
         :type folderId: string :param folderId: ID of the folder that you have access to. Don't specify this field if
-        you make a request on behalf of a service account.
+            you make a request on behalf of a service account.
 
-        :return: The recognized text, string
+        :return: The recognized text
+        :rtype: string
         """
-
-        if self._headers is None:
-            raise RuntimeError("You must call `RecognizeShortAudio.__init__()` first.")
 
         if not isinstance(data, (io.BytesIO, bytes)):
             raise InvalidDataError("Data must be bytes io or bytes.")
+
+        if 'lang' in kwargs:
+            if not type(kwargs['lang']) is str:
+                raise TypeError("__init__() kwargs['lang']: got {} but expected \
+                type is str".format(type(kwargs["lang"]).__name__))
+
+        if self._headers is None:
+            raise RuntimeError("You must call `RecognizeShortAudio.__init__()` first.")
 
         if sys.getsizeof(data) > 1024 * 1024:
             raise InvalidDataError("Maximum file size: 1 MB. Got {} bytes.".format(sys.getsizeof(data)))
@@ -180,8 +199,8 @@ class RecognizeLongAudio:
         * Send a file for recognition.
         * Get recognition results.
 
-        >>> recognizeLongAudio = RecognizeLongAudio('<Api-Key>')
-        >>> recognizeLongAudio.send_for_recognition('<object storage uri>')
+        >>> recognizeLongAudio = RecognizeLongAudio('<yandex_passport_oauth_token>', '<service_account_id>')
+        >>> recognizeLongAudio.send_for_recognition('file/path')
         >>> if recognizeLongAudio.get_recognition_results():
         ...     data = recognizeLongAudio.get_data()
         ...
@@ -197,9 +216,13 @@ class RecognizeLongAudio:
         :type api_key: string
         :param api_key: The API key is a private key used for simplified
             authorization in the Yandex.Cloud API.
+
+        :return: __init__ should return None
+        :rtype: None
         """
         self._id = None
         self._answer_data = None
+        self._aws_file_name = None
 
         if not isinstance(yandex_passport_oauth_token, str) or yandex_passport_oauth_token == '':
             raise InvalidDataError("`yandex_passport_oauth_token` must be not empty string, but got `{}`".format(
@@ -242,11 +265,12 @@ class RecognizeLongAudio:
     def _init_aws(**kwargs):
         """Get s3 session
 
-        :param string aws_access_key_id: The access key to use when creating the client.  This
-        is entirely optional, and if not provided, the credentials configured for the session will automatically be used.
-         You only need to provide this argument if you want to override the credentials used for this specific client.
+        :param string aws_access_key_id: The access key to use when creating the client.  This is entirely optional,
+        and if not provided, the credentials configured for the session will automatically be used. You only need to
+        provide this argument if you want to override the credentials used for this specific client.
 
-        :param  string aws_secret_access_key: The secret key to use when creating the client. Same semantics as aws_access_key_id above.
+        :param  string aws_secret_access_key: The secret key to use when creating the client. Same semantics as
+        aws_access_key_id above.
 
         :param string region_name: The name of the region associated with the client.
             A client is associated with a single region.
@@ -302,14 +326,14 @@ class RecognizeLongAudio:
         return self._s3.delete_objects(
             Bucket=bucket_name, Delete={'Objects': [{'Key': aws_file_name}]})
 
-    def send_for_recognition(self, file_path, folder_id=None, **kwargs):
+    def send_for_recognition(self, file_path, **kwargs):
         """Send a file for recognition
 
         :type file_path: string
         :param file_path: Path to input file
 
         :param string folder_id: ID of the folder that you have access to. Don't specify this field if
-        you make a request on behalf of a service account.
+            you make a request on behalf of a service account.
 
         :type languageCode: string
         :param languageCode: The language that recognition will be performed for.
@@ -333,8 +357,11 @@ class RecognizeLongAudio:
         :type sampleRateHertz: integer
         :param sampleRateHertz: The sampling frequency of the submitted audio.
             Required if format is set to LINEAR16_PCM. Acceptable values:
+
             * `48000` (default): Sampling rate of 48 kHz.
+
             * `16000`: Sampling rate of 16 kHz.
+
             * `8000`: Sampling rate of 8 kHz.
 
         :type audioChannelCount: integer
@@ -346,9 +373,6 @@ class RecognizeLongAudio:
             `true`: In words. `false` (default): In figures.
         """
 
-        # if folder_id is None:
-        #     raise InvalidDataError("`folder_id` required.")
-
         self._aws_file_name = Path(file_path).name + str(uuid.uuid4())
         self._aws_upload_file(file_path, self._aws_bucket_name, self._aws_file_name)
         aws_presigned_url = self._create_presigned_url(self._aws_bucket_name, self._aws_file_name)
@@ -359,7 +383,6 @@ class RecognizeLongAudio:
 
             "config": {
                 "specification": {
-                    # "folderId": folder_id,
                     **kwargs
                 }
             },
@@ -408,21 +431,22 @@ class RecognizeLongAudio:
                 * `words[]`: List of recognized words:
 
                     * `startTime`: Time stamp of the beginning of the word in the recording. An error of 1-2 seconds
-                    is possible.
+                        is possible.
 
                     * `endTime`: Time stamp of the end of the word. An error of 1-2 seconds is possible.
 
                     * `word`: Recognized word. Recognized numbers are written in words (for example, twelve rather
-                    than 12).
+                        than 12).
 
                     * `confidence`: This field currently isn't supported. Don't use it.
 
                     * `text`: Full recognized text. By default, numbers are written in figures. To output the entire
-                    text in words, specify true in the raw_results field.
+                        text in words, specify true in the raw_results field.
 
                     * `confidence`: This field currently isn't supported. Don't use it.
 
             * `channelTag`: Audio channel that recognition was performed for.
+
         """
 
         if self._answer_data is None:
@@ -490,8 +514,11 @@ class SynthesizeAudio:
         :type lang: string
         :param lang: Language.
             Acceptable values:
+
             * `ru-RU` (default) — Russian.
+
             * `en-US` — English.
+
             * `tr-TR` — Turkish.
 
         :type voice: string
@@ -501,8 +528,11 @@ class SynthesizeAudio:
         :type speed: string
         :param speed: Rate (speed) of synthesized speech.
             The rate of speech is set as a decimal number in the range from 0.1 to 3.0. Where:
+
             * `3.0` — Fastest rate.
+
             * `1.0` (default) — Average human speech rate.
+
             * `0.1` — Slowest speech rate.
 
         :type format: string
@@ -510,16 +540,19 @@ class SynthesizeAudio:
             * `lpcm` — Audio file is synthesized in LPCM format with no WAV _header. Audio properties:
 
                 * Sampling — 8, 16, or 48 kHz, depending on the value of the `sampleRateHertz` parameter.
+
                 * Bit depth — 16-bit.
+
                 * Byte order — Reversed (little-endian).
+
                 * Audio data is stored as signed integers.
 
             * `oggopus` (default) — Data in the audio file is encoded using the OPUS audio codec and compressed using
-            the OGG container format (OggOpus).
+                the OGG container format (OggOpus).
 
         :type sampleRateHertz: string :param sampleRateHertz: The sampling frequency of the synthesized audio. Used
-        if format is set to lpcm. Acceptable values: * `48000` (default): Sampling rate of 48 kHz. * `16000`:
-        Sampling rate of 16 kHz. * `8000`: Sampling rate of 8 kHz.
+            if format is set to lpcm. Acceptable values: * `48000` (default): Sampling rate of 48 kHz. * `16000`:
+            Sampling rate of 16 kHz. * `8000`: Sampling rate of 8 kHz.
 
         :type folderId: string
         :param folderId: ID of the folder that you have access to.
@@ -553,8 +586,11 @@ class SynthesizeAudio:
         :type lang: string
         :param lang: Language.
             Acceptable values:
+
             * `ru-RU` (default) — Russian.
+
             * `en-US` — English.
+
             * `tr-TR` — Turkish.
 
         :type voice: string
@@ -564,8 +600,11 @@ class SynthesizeAudio:
         :type speed: string
         :param speed: Rate (speed) of synthesized speech.
             The rate of speech is set as a decimal number in the range from 0.1 to 3.0. Where:
+
             * `3.0` — Fastest rate.
+
             * `1.0` (default) — Average human speech rate.
+
             * `0.1` — Slowest speech rate.
 
         :type format: string
@@ -573,18 +612,24 @@ class SynthesizeAudio:
             * `lpcm` — Audio file is synthesized in LPCM format with no WAV _header. Audio properties:
 
                 * Sampling — 8, 16, or 48 kHz, depending on the value of the `sampleRateHertz` parameter.
+
                 * Bit depth — 16-bit.
+
                 * Byte order — Reversed (little-endian).
+
                 * Audio data is stored as signed integers.
 
             * `oggopus` (default) — Data in the audio file is encoded using the OPUS audio codec and compressed using
-            the OGG container format (OggOpus).
+                the OGG container format (OggOpus).
 
         :type sampleRateHertz: string
         :param sampleRateHertz: The sampling frequency of the synthesized audio.
             Used if format is set to lpcm. Acceptable values:
+
             * `48000` (default): Sampling rate of 48 kHz.
+
             * `16000`: Sampling rate of 16 kHz.
+
             * `8000`: Sampling rate of 8 kHz.
 
         :type folderId: string

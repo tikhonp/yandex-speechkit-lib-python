@@ -1,8 +1,7 @@
-import unittest
-import io
 import os
 import pathlib
 import time
+import unittest
 import warnings
 
 import speechkit
@@ -64,8 +63,8 @@ class GetApiKeyTestCase(unittest.TestCase):
 class ListOfServiceAccountsTestCase(unittest.TestCase):
     def test_request(self):
         api_key = os.environ.get('API_KEY')
-        folderId = os.environ.get('CATALOG')
-        data = speechkit.list_of_service_accounts(api_key, folderId)
+        folder_id = os.environ.get('CATALOG')
+        data = speechkit.list_of_service_accounts(api_key, folder_id)
         self.assertIsInstance(data, list)
 
 
@@ -76,22 +75,23 @@ class RecognizeShortAudioTestCase(unittest.TestCase):
 
     def test_init(self):
         api_key = os.environ.get('API_KEY')
-        speechkit.RecognizeShortAudio(api_key)
+        recognize_short_audio = speechkit.RecognizeShortAudio(api_key)
+        self.assertIsInstance(recognize_short_audio._headers, dict)
 
     def test_wrong_catalog(self):
         api_key = os.environ.get('API_KEY')
-        recognizeShortAudio = speechkit.RecognizeShortAudio(api_key)
+        recognize_short_audio = speechkit.RecognizeShortAudio(api_key)
 
         with self.assertRaises(speechkit.RequestError):
-            recognizeShortAudio.recognize(bytes(), folderId='lol')
+            recognize_short_audio.recognize(bytes(), folderId='lol')
 
     def test_recognize(self):
         api_key = os.environ.get('API_KEY')
-        recognizeShortAudio = speechkit.RecognizeShortAudio(api_key)
+        recognize_short_audio = speechkit.RecognizeShortAudio(api_key)
 
-        folderId = os.environ.get('CATALOG')
-        text = recognizeShortAudio.recognize(
-            test_data, folderId=folderId,
+        folder_id = os.environ.get('CATALOG')
+        text = recognize_short_audio.recognize(
+            test_data, folderId=folder_id,
             format='lpcm', sampleRateHertz='48000'
         )
         self.assertIsInstance(text, str)
@@ -103,49 +103,50 @@ class RecognizeLongAudio(unittest.TestCase):
 
     def test_init_wrong_description_and_api_key(self):
         with self.assertRaises(speechkit.InvalidDataError):
-            speechkit.RecognizeLongAudio(1, 'aid', 'buckn')
+            speechkit.RecognizeLongAudio(1, 'aid', 'bucket')
 
         with self.assertRaises(speechkit.InvalidDataError):
-            speechkit.RecognizeLongAudio('', '', 'buckn')
+            speechkit.RecognizeLongAudio('', '', 'bucket')
 
         with self.assertRaises(speechkit.InvalidDataError):
-            speechkit.RecognizeLongAudio('lol', 'acid', 'buckn', aws_credentials_description='l' * 257)
+            speechkit.RecognizeLongAudio('lol', 'acid', 'bucket', aws_credentials_description='l' * 257)
 
     def test_assert_wrong_key_and_wrong_token(self):
         with self.assertRaises(speechkit.RequestError):
-            speechkit.RecognizeLongAudio('lol', '', 'buckn')
+            speechkit.RecognizeLongAudio('lol', '', 'bucket')
 
     def test_init(self):
         api_key = os.environ.get('API_KEY')
         service_account_id = os.environ.get('SERVICE_ACCOUNT_ID')
         bucket_name = os.environ.get('BUCKET_NAME')
-        speechkit.RecognizeLongAudio(api_key, service_account_id, bucket_name)
+        recognize_long_audio = speechkit.RecognizeLongAudio(api_key, service_account_id, bucket_name)
+        self.assertIsInstance(recognize_long_audio._api_key_headers, dict)
 
     def test_recognition(self):
         api_key = os.environ.get('API_KEY')
         service_account_id = os.environ.get('SERVICE_ACCOUNT_ID')
         bucket_name = os.environ.get('BUCKET_NAME')
-        folderId = os.environ.get('CATALOG')
 
-        recognizeLongAudio = speechkit.RecognizeLongAudio(api_key, service_account_id, bucket_name)
+        recognize_long_audio = speechkit.RecognizeLongAudio(api_key, service_account_id, bucket_name)
 
         self.path = os.path.join(os.path.dirname(__file__), 'test_rec.wav')
         with open(self.path, 'wb') as f:
             f.write(test_data)
 
-        recognizeLongAudio.send_for_recognition(
-            self.path, folder_id=folderId, audioEncoding='LINEAR16_PCM', sampleRateHertz='48000',
+        recognize_long_audio.send_for_recognition(
+            self.path, audioEncoding='LINEAR16_PCM', sampleRateHertz='48000',
             audioChannelCount=1, rawResults=False
         )
 
         while True:
             time.sleep(2)
-            if recognizeLongAudio.get_recognition_results(): break
+            if recognize_long_audio.get_recognition_results():
+                break
 
-        data = recognizeLongAudio.get_data()
+        data = recognize_long_audio.get_data()
         self.assertIsInstance(data, (list, type(None)))
 
-        text = recognizeLongAudio.get_raw_text()
+        text = recognize_long_audio.get_raw_text()
         self.assertIsInstance(text, str)
 
 
@@ -156,45 +157,46 @@ class SynthesizeAudio(unittest.TestCase):
 
     def test_init(self):
         api_key = os.environ.get('API_KEY')
-        speechkit.SynthesizeAudio(api_key)
+        synthesize_audio = speechkit.SynthesizeAudio(api_key)
+        self.assertIsInstance(synthesize_audio._headers, dict)
 
     def test_wrong_catalog(self):
         api_key = os.environ.get('API_KEY')
-        synthesizeAudio = speechkit.SynthesizeAudio(api_key)
+        synthesize_audio = speechkit.SynthesizeAudio(api_key)
 
         with self.assertRaises(speechkit.RequestError):
-            synthesizeAudio.synthesize_stream(text='text', folderId='lol')
+            synthesize_audio.synthesize_stream(text='text', folderId='lol')
 
     def test_synthesize(self):
         api_key = os.environ.get('API_KEY')
-        synthesizeAudio = speechkit.SynthesizeAudio(api_key)
+        synthesize_audio = speechkit.SynthesizeAudio(api_key)
 
-        folderId = os.environ.get('CATALOG')
+        folder_id = os.environ.get('CATALOG')
         self.path = os.path.join(os.path.dirname(__file__), 'test_synth.wav')
-        synthesizeAudio.synthesize(
+        synthesize_audio.synthesize(
             self.path, text='text',
             voice='oksana', format='lpcm', sampleRateHertz='16000',
-            folderId=folderId
+            folderId=folder_id
         )
         self.assertTrue(pathlib.Path(self.path).resolve().is_file())
 
     def test_assert_synthesize(self):
         api_key = os.environ.get('API_KEY')
-        synthesizeAudio = speechkit.SynthesizeAudio(api_key)
+        synthesize_audio = speechkit.SynthesizeAudio(api_key)
 
         with self.assertRaises(speechkit.InvalidDataError):
-            synthesizeAudio.synthesize(
+            synthesize_audio.synthesize(
                 'ok', text='t' * 5001
             )
 
     def test_synthesize_stream(self):
         api_key = os.environ.get('API_KEY')
-        synthesizeAudio = speechkit.SynthesizeAudio(api_key)
+        synthesize_audio = speechkit.SynthesizeAudio(api_key)
 
-        folderId = os.environ.get('CATALOG')
-        data = synthesizeAudio.synthesize_stream(
+        folder_id = os.environ.get('CATALOG')
+        data = synthesize_audio.synthesize_stream(
             text='text', voice='oksana', format='lpcm',
-            sampleRateHertz='16000', folderId=folderId
+            sampleRateHertz='16000', folderId=folder_id
         )
         self.assertIsInstance(data, bytes)
 
