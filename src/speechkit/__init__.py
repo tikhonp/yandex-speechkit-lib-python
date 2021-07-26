@@ -93,7 +93,8 @@ class RecognizeShortAudio:
         if self._token is None:
             raise RuntimeError("You must call `RecognizeShortAudio.__init__()` first.")
 
-        assert isinstance(data, (io.BytesIO, bytes))
+        if not isinstance(data, (io.BytesIO, bytes)):
+            raise InvalidDataError("Data must be bytes io or bytes.")
 
         if sys.getsizeof(data) > 1024 * 1024:
             raise InvalidDataError("Maximum file size: 1 MB. Got {} bytes.".format(sys.getsizeof(data)))
@@ -502,5 +503,7 @@ class SynthesizeAudio:
             Required for authorization with a user account (see the UserAccount resource).
             Don't specify this field if you make a request on behalf of a service account.
         """
+        if 'text' in kwargs and len(kwargs.get('text', '')) > 5000:
+            raise InvalidDataError("Text must be less than 5000 characters")
 
         return self._synthesize_stream(**kwargs)

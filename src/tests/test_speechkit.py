@@ -52,7 +52,7 @@ class RecognizeShortAudioTestCase(unittest.TestCase):
         api_key = os.environ.get('API_KEY')
         recognizeShortAudio = speechkit.RecognizeShortAudio(api_key)
 
-        with open('tests/test.wav', 'rb') as f:
+        with open(os.path.join(os.path.dirname(__file__), 'test.wav'), 'rb') as f:
             data = f.read()
 
         folderId = os.environ.get('CATALOG')
@@ -92,7 +92,7 @@ class SynthesizeAudio(unittest.TestCase):
         synthesizeAudio = speechkit.SynthesizeAudio(api_key)
 
         folderId = os.environ.get('CATALOG')
-        self.path = 'tests/test_synth.wav'
+        self.path = os.path.join(os.path.dirname(__file__), 'test_synth.wav')
         synthesizeAudio.synthesize(
             self.path, text='text',
             voice='oksana', format='lpcm', sampleRateHertz='16000',
@@ -100,6 +100,25 @@ class SynthesizeAudio(unittest.TestCase):
         )
         self.assertTrue(pathlib.Path(self.path).resolve().is_file())
 
+    def test_assert_synthesize(self):
+        api_key = os.environ.get('API_KEY')
+        synthesizeAudio = speechkit.SynthesizeAudio(api_key)
+
+        with self.assertRaises(speechkit.InvalidDataError):
+            synthesizeAudio.synthesize(
+                'ok', text='t'*5001
+            )
+
+    def test_synthesize_stream(self):
+        api_key = os.environ.get('API_KEY')
+        synthesizeAudio = speechkit.SynthesizeAudio(api_key)
+
+        folderId = os.environ.get('CATALOG')
+        data = synthesizeAudio.synthesize_stream(
+            text='text', voice='oksana', format='lpcm',
+            sampleRateHertz='16000', folderId=folderId
+        )
+        self.assertIsInstance(data, bytes)
 
 if __name__ == '__main__':
     unittest.main()
