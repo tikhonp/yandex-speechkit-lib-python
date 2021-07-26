@@ -8,12 +8,12 @@ script, filename, outfilename, baketname = argv
 
 objstrname = 'output_' + filename.split('/')[-1]
 
-api_id = 'your api id here'
+api_id = 'your api _id here'
 api_key = 'your api key here'
 
 objectStorage = speechkit.ObjectStorage(
     aws_access_key_id=api_id, aws_secret_access_key=api_key)
-objectStorage.upload_file(filename, baketname, objstrname)
+objectStorage._aws_upload_file(filename, baketname, objstrname)
 urltofile = objectStorage.create_presigned_url(baketname, objstrname)
 
 apiKey = 'your api key here'

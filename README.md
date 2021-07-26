@@ -1,6 +1,6 @@
 # Yandex Speechkit Python SDK
 
-![PyPI](https://img.shields.io/pypi/v/speechkit) ![GitHub](https://img.shields.io/github/license/tikhonp/yandex-speechkit-lib-python) ![PyPI - Format](https://img.shields.io/pypi/format/wheel) [![Build Status](https://travis-ci.com/TikhonP/yandex-speechkit-lib-python.svg?branch=master)](https://travis-ci.com/TikhonP/yandex-speechkit-lib-python)
+![PyPI](https://img.shields.io/pypi/v/speechkit) ![GitHub](https://img.shields.io/github/license/tikhonp/yandex-speechkit-lib-python) ![PyPI - Format](https://img.shields.io/pypi/format/wheel) [![Build Status](https://travis-ci.com/TikhonP/yandex-speechkit-lib-python.svg?branch=master)](https://travis-ci.com/TikhonP/yandex-speechkit-lib-python) [![Updates](https://pyup.io/repos/github/TikhonP/yandex-speechkit-lib-python/shield.svg)](https://pyup.io/repos/github/TikhonP/yandex-speechkit-lib-python/) [![Python 3](https://pyup.io/repos/github/TikhonP/yandex-speechkit-lib-python/python-3-shield.svg)](https://pyup.io/repos/github/TikhonP/yandex-speechkit-lib-python/)
 
 It's lib for using speechkit api by yandex.
 
@@ -39,7 +39,7 @@ From a Python interpreter:
 >>> with open('/Users/tikhon/Desktop/out.wav', 'rb') as f:
 ...     data = f.read()
 ... 
->>> recognizeShortAudio.recognize(data, folderId='<folder id>', format='lpcm', sampleRateHertz='48000')
+>>> recognizeShortAudio.recognize(data, folderId='<folder _id>', format='lpcm', sampleRateHertz='48000')
 'Текст который нужно распознать'
 ```
 
@@ -48,7 +48,7 @@ From a Python interpreter:
 ```python3
 >>> import speechkit
 >>> synthesizeAudio = speechkit.SynthesizeAudio('<yandex_passport_oauth_token>')
->>> synthesizeAudio.synthesize('/Users/tikhon/Desktop/outtt.wav', text='Текст который нужно синтезировать', voice='oksana', format='lpcm', sampleRateHertz='16000', folderId='<folder id>')
+>>> synthesizeAudio.synthesize('/Users/tikhon/Desktop/outtt.wav', text='Текст который нужно синтезировать', voice='oksana', format='lpcm', sampleRateHertz='16000', folderId='<folder _id>')
 ```
 
 Read documentation for more methods

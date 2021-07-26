@@ -1,14 +1,19 @@
 """speechkit
 Python SDK for using Yandex Speech recognition and synthesis
 """
+
+__author__ = 'Tikhon Petrishchev'
+__version__ = '1.3.5'
+
 import io
 import sys
+import uuid
+from pathlib import Path
 
 import boto3
 import requests
 
-__author__ = 'Tikhon Petrishchev'
-__version__ = '1.3.5'
+from typing import List
 
 
 class InvalidDataError(ValueError):
@@ -19,10 +24,65 @@ class InvalidDataError(ValueError):
 class RequestError(Exception):
     """Exception raised for errors while yandex api request"""
 
-    def __init__(self, answer: dict, *args, **kwargs):
+    def __init__(self, answer: dict, *args):
         self.error_code = str(answer.get('code', '')) + str(answer.get('error_code', ''))
         self.message = str(answer.get('message', '')) + str(answer.get('error_message', ''))
-        super().__init__(self.error_code + ' ' + self.message, *args, **kwargs)
+        super().__init__(self.error_code + ' ' + self.message, *args)
+
+
+def get_iam_token(yandex_passport_oauth_token: str = None, jwt: str = None) -> str:
+    """Creates an IAM token for the specified identity."""
+
+    if (not yandex_passport_oauth_token and not jwt) or (yandex_passport_oauth_token and jwt):
+        raise InvalidDataError("Includes only one of the fields `yandexPassportOauthToken`, `jwt`")
+
+    if yandex_passport_oauth_token:
+        data = {'yandexPassportOauthToken': str(yandex_passport_oauth_token)}
+    else:
+        data = {'jwt': str(jwt)}
+
+    url = "https://iam.api.cloud.yandex.net/iam/v1/tokens"
+    answer = requests.post(url, json=data)
+
+    if answer.ok:
+        return answer.json().get('iamToken')
+    else:
+        raise RequestError(answer.json())
+
+
+def get_api_key(yandex_passport_oauth_token: str = None, service_account_id: str = None,
+                description: str = 'Default Api-Key created by `speechkit` python SDK') -> str:
+    """Creates an API key for the specified service account."""
+
+    if not yandex_passport_oauth_token or not service_account_id:
+        raise InvalidDataError("`yandex_passport_oauth_token` and `service_account_id` required.")
+
+    url = 'https://iam.api.cloud.yandex.net/iam/v1/apiKeys'
+    headers = {
+        'Authorization': 'Bearer {}'.format(get_iam_token(yandex_passport_oauth_token=yandex_passport_oauth_token))
+    }
+    data = {'serviceAccountId': service_account_id, 'description': description}
+
+    answer = requests.post(url, headers=headers, json=data)
+    if answer.ok:
+        return answer.json().get('secret')
+    else:
+        raise RequestError(answer.json())
+
+
+def list_of_service_accounts(yandex_passport_oauth_token, folder_id, **kwargs) -> List[dict]:
+    """Retrieves the list of ServiceAccount resources in the specified folder."""
+
+    headers = {
+        'Authorization': 'Bearer {}'.format(get_iam_token(yandex_passport_oauth_token=yandex_passport_oauth_token))
+    }
+    url = 'https://iam.api.cloud.yandex.net/iam/v1/serviceAccounts'
+    data = {'folderId': folder_id, **kwargs}
+    answer = requests.get(url, headers=headers, json=data)
+    if answer.ok:
+        return answer.json().get('serviceAccounts', [])
+    else:
+        raise RequestError(answer.json())
 
 
 class RecognizeShortAudio:
@@ -43,15 +103,9 @@ class RecognizeShortAudio:
         :param yandex_passport_oauth_token: OAuth _token from Yandex.OAuth
         """
 
-        self._token = None
-        url = "https://iam.api.cloud.yandex.net/iam/v1/tokens"
-        data = {'yandexPassportOauthToken': str(yandex_passport_oauth_token)}
-        answer = requests.post(url, json=data)
-
-        if answer.ok:
-            self._token = answer.json().get('iamToken')
-        else:
-            raise RequestError(answer.json())
+        self._headers = {
+            'Authorization': 'Bearer {}'.format(get_iam_token(yandex_passport_oauth_token=yandex_passport_oauth_token))
+        }
 
     def recognize(self, data, **kwargs):
         """
@@ -74,7 +128,7 @@ class RecognizeShortAudio:
 
         :type format: string
         :param format: The format of the submitted audio. Acceptable values:
-            * `lpcm` — LPCM with no WAV header.
+            * `lpcm` — LPCM with no WAV _header.
             * `oggopus` (default) — OggOpus.
 
         :type sampleRateHertz: string
@@ -90,7 +144,7 @@ class RecognizeShortAudio:
         :return: The recognized text, string
         """
 
-        if self._token is None:
+        if self._headers is None:
             raise RuntimeError("You must call `RecognizeShortAudio.__init__()` first.")
 
         if not isinstance(data, (io.BytesIO, bytes)):
@@ -109,85 +163,12 @@ class RecognizeShortAudio:
                         seconds_duration))
 
         url = 'https://stt.api.cloud.yandex.net/speech/v1/stt:recognize'
-        headers = {'Authorization': 'Bearer {}'.format(self._token)}
-
-        answer = requests.post(url, params=kwargs, data=data, headers=headers)
+        answer = requests.post(url, params=kwargs, data=data, headers=self._headers)
 
         if answer.ok:
             return answer.json().get('result')
         else:
             raise RequestError(answer.json())
-
-
-class ObjectStorage:
-    """Interact with AWS object storage.
-
-    :type aws_access_key_id: string :param aws_access_key_id: The access key to use when creating the client.  This
-    is entirely optional, and if not provided, the credentials configured for the session will automatically be used.
-     You only need to provide this argument if you want to override the credentials used for this specific client.
-
-    :type aws_secret_access_key: string :param aws_secret_access_key: The secret key to use when creating the client.
-     Same semantics as aws_access_key_id above.
-
-    :type aws_session_token: string :param aws_session_token: The session _token to use when creating the client.
-    Same semantics as aws_access_key_id above.
-    """
-
-    def __init__(self, **kwargs):
-        session = boto3.session.Session()
-        self.s3 = session.client(
-            service_name='s3',
-            endpoint_url='https://storage.yandexcloud.net',
-            **kwargs
-        )
-
-    def upload_file(self, file_path, baket_name, aws_file_name):
-        """Upload a file to object storage
-
-        :type file_path: string
-        :param file_path: Path to input file
-        :type baket_name: string
-        :type aws_file_name: string
-        :param aws_file_name: Name of file in object storage
-        """
-        return self.s3.upload_file(file_path, baket_name, aws_file_name)
-
-    def list_objects_in_bucket(self, bucket_name):
-        """Get list of all objects in backet"""
-
-        return self.s3.list_objects(Bucket=bucket_name)
-
-    def delete_object(self, aws_file_name, bucket_name):
-        """Delete object in bucket
-
-        :type aws_file_name: string
-        :param aws_file_name: Name of file in object storage
-        :type bucket_name: string
-        """
-
-        return self.s3.delete_objects(
-            Bucket=bucket_name, Delete={'Objects': [{'Key': aws_file_name}]})
-
-    def create_presigned_url(self, bucket_name, aws_file_name,
-                             expiration=3600):
-        """Generate a presigned URL to share an S3 object
-
-        :type bucket_name: string
-
-        :type aws_file_name: string
-        :param aws_file_name: Name of file in object storage
-
-        :type expiration: integer
-        :param expiration: Time in seconds for the presigned URL to remain valid
-
-        :return: Resigned URL as string.
-        """
-
-        return self.s3.generate_presigned_url(
-            'get_object',
-            Params={'Bucket': bucket_name, 'Key': aws_file_name},
-            ExpiresIn=expiration
-        )
 
 
 class RecognizeLongAudio:
@@ -208,25 +189,127 @@ class RecognizeLongAudio:
         'raw recognized text'
     """
 
-    def __init__(self, api_key):
+    def __init__(self, yandex_passport_oauth_token, service_account_id, aws_bucket_name=None,
+                 aws_credentials_description='Default AWS credentials created by `speechkit` python SDK',
+                 aws_region_name='ru-central1'):
         """Initialize Api-Key for recognizing long audio
 
         :type api_key: string
         :param api_key: The API key is a private key used for simplified
             authorization in the Yandex.Cloud API.
         """
+        self._id = None
+        self._answer_data = None
 
-        self.api_key = api_key
-        self.header = {'Authorization': 'Api-Key {}'.format(self.api_key)}
-        self.id = None
-        self.answer_data = None
+        if not isinstance(yandex_passport_oauth_token, str) or yandex_passport_oauth_token == '':
+            raise InvalidDataError("`yandex_passport_oauth_token` must be not empty string, but got `{}`".format(
+                yandex_passport_oauth_token))
 
-    def send_for_recognition(self, uri, **kwargs):
+        if len(aws_credentials_description) > 256:
+            raise InvalidDataError("The maximum `description` string length in characters is 256.")
+
+        self._headers = {
+            'Authorization': 'Bearer {}'.format(get_iam_token(yandex_passport_oauth_token=yandex_passport_oauth_token))
+        }
+
+        url_aws_credentials = 'https://iam.api.cloud.yandex.net/iam/aws-compatibility/v1/accessKeys'
+        data_aws_credentials = {'description': aws_credentials_description, 'serviceAccountId': service_account_id}
+        answer = requests.post(url_aws_credentials, headers=self._headers, json=data_aws_credentials)
+
+        if not answer.ok:
+            raise RequestError(answer.json())
+
+        answer = answer.json()
+        self._s3 = self._init_aws(
+            aws_access_key_id=answer.get('accessKey', {}).get('keyId'),
+            aws_secret_access_key=answer.get('secret'),
+            region_name=aws_region_name,
+        )
+
+        if aws_bucket_name:
+            self._aws_bucket_name = aws_bucket_name
+        else:
+            self._aws_bucket_name = 'py_speechkit_' + str(uuid.uuid4())
+            self._s3.create_bucket(Bucket=self._aws_bucket_name)
+
+        self._api_key_headers = {
+            'Authorization': 'Api-Key {}'.format(get_api_key(
+                yandex_passport_oauth_token, service_account_id
+            ))
+        }
+
+    @staticmethod
+    def _init_aws(**kwargs):
+        """Get s3 session
+
+        :param string aws_access_key_id: The access key to use when creating the client.  This
+        is entirely optional, and if not provided, the credentials configured for the session will automatically be used.
+         You only need to provide this argument if you want to override the credentials used for this specific client.
+
+        :param  string aws_secret_access_key: The secret key to use when creating the client. Same semantics as aws_access_key_id above.
+
+        :param string region_name: The name of the region associated with the client.
+            A client is associated with a single region.
+        """
+
+        session = boto3.session.Session()
+        return session.client(
+            service_name='s3',
+            endpoint_url='https://storage.yandexcloud.net',
+            **kwargs
+        )
+
+    def _aws_upload_file(self, file_path, baket_name, aws_file_name):
+        """Upload a file to object storage
+
+        :type file_path: string
+        :param file_path: Path to input file
+        :type baket_name: string
+        :type aws_file_name: string
+        :param aws_file_name: Name of file in object storage
+        """
+        return self._s3.upload_file(file_path, baket_name, aws_file_name)
+
+    def _create_presigned_url(self, bucket_name, aws_file_name,
+                              expiration=3600):
+        """Generate a presigned URL to share an S3 object
+
+        :type bucket_name: string
+
+        :type aws_file_name: string
+        :param aws_file_name: Name of file in object storage
+
+        :type expiration: integer
+        :param expiration: Time in seconds for the presigned URL to remain valid
+
+        :return: Resigned URL as string.
+        """
+
+        return self._s3.generate_presigned_url(
+            'get_object',
+            Params={'Bucket': bucket_name, 'Key': aws_file_name},
+            ExpiresIn=expiration
+        )
+
+    def _delete_object(self, bucket_name, aws_file_name):
+        """Delete object in bucket
+
+        :type aws_file_name: string
+        :param aws_file_name: Name of file in object storage
+        :type bucket_name: string
+        """
+
+        return self._s3.delete_objects(
+            Bucket=bucket_name, Delete={'Objects': [{'Key': aws_file_name}]})
+
+    def send_for_recognition(self, file_path, folder_id=None, **kwargs):
         """Send a file for recognition
 
-        :type uri: string
-        :param uri: The URI of the audio file for recognition.
-            Supports only links to files stored in Yandex Object Storage.
+        :type file_path: string
+        :param file_path: Path to input file
+
+        :param string folder_id: ID of the folder that you have access to. Don't specify this field if
+        you make a request on behalf of a service account.
 
         :type languageCode: string
         :param languageCode: The language that recognition will be performed for.
@@ -243,7 +326,7 @@ class RecognizeLongAudio:
         :param audioEncoding: The format of the submitted audio.
             Acceptable values:
 
-            * `LINEAR16_PCM`: LPCM with no WAV header.
+            * `LINEAR16_PCM`: LPCM with no WAV _header.
 
             * `OGG_OPUS` (default): OggOpus format.
 
@@ -263,49 +346,62 @@ class RecognizeLongAudio:
             `true`: In words. `false` (default): In figures.
         """
 
+        # if folder_id is None:
+        #     raise InvalidDataError("`folder_id` required.")
+
+        self._aws_file_name = Path(file_path).name + str(uuid.uuid4())
+        self._aws_upload_file(file_path, self._aws_bucket_name, self._aws_file_name)
+        aws_presigned_url = self._create_presigned_url(self._aws_bucket_name, self._aws_file_name)
+
         url = "https://transcribe.api.cloud.yandex.net/" \
               "speech/stt/v2/longRunningRecognize"
         data = {
+
             "config": {
                 "specification": {
+                    # "folderId": folder_id,
                     **kwargs
                 }
             },
             "audio": {
-                "uri": uri
+                "uri": aws_presigned_url
             }
         }
-        answer = requests.post(url, headers=self.header, json=data)
+        answer = requests.post(url, headers=self._api_key_headers, json=data)
         if answer.ok:
-            self.id = answer.json().get('id')
+            self._id = answer.json().get('id')
         else:
             raise RequestError(answer.json())
 
-    def get_recognition_results(self):
+    def get_recognition_results(self) -> bool:
         """Monitor the recognition results using the received ID.
         The number of result monitoring requests is limited,
         so consider the recognition speed: it takes about 10 seconds
         to recognize 1 minute of single-channel audio.
         """
 
-        if self.id is None:
+        if self._id is None:
             raise RuntimeError("You must send for recognition first.")
 
-        url = "https://operation.api.cloud.yandex.net/operations/{id}".format(id=self.id)
-        self.answer_data = requests.get(url, headers=self.header)
-        if self.answer_data.ok:
-            self.answer_data = self.answer_data.json()
-            return self.answer_data.get('done')
+        url = "https://operation.api.cloud.yandex.net/operations/{id}".format(id=self._id)
+        self._answer_data = requests.get(url, headers=self._headers)
+        if self._answer_data.ok:
+            self._answer_data = self._answer_data.json()
+            done = self._answer_data.get('done')
+            if done:
+                self._delete_object(self._aws_bucket_name, self._aws_file_name)
+
+            return done
         else:
-            raise RequestError(self.answer_data.json())
+            raise RequestError(self._answer_data.json())
 
     def get_data(self):
         """Get the response.
-        Use :meth:`RecognizeLongAudio.get_recognition_results` first to store answer_data
+        Use :meth:`RecognizeLongAudio.get_recognition_results` first to store _answer_data
 
         Contain a list of recognition results (`chunks[]`).
 
-        :return: Each result in the chunks[] list contains the following fields:
+        :return: `None` if text not found ot Each result in the chunks[] list contains the following fields:
 
             * `alternatives[]`: List of recognized text alternatives. Each alternative contains the following fields:
 
@@ -329,21 +425,21 @@ class RecognizeLongAudio:
             * `channelTag`: Audio channel that recognition was performed for.
         """
 
-        if self.answer_data is None:
-            raise ValueError("You must call 'get_recognition_results' first")
-        return self.answer_data.get('results')
+        if self._answer_data is None:
+            raise ValueError("You must call `RecognizeLongAudio.get_recognition_results` first")
+        return self._answer_data.get('results')
 
     def get_raw_text(self):
-        """Get raw text from answer_data data
+        """Get raw text from _answer_data data
 
         :return: Text
         """
 
-        if self.answer_data is None:
+        if self._answer_data is None:
             raise ValueError("You must call 'get_recognition_results' first")
 
         text = ''
-        for chunk in self.answer_data.get('response', {}).get('chunks'):
+        for chunk in self._answer_data.get('response', {}).get('chunks', []):
             text += chunk['alternatives'][0]['text']
         return text
 
@@ -357,22 +453,15 @@ class SynthesizeAudio:
         :param yandex_passport_oauth_token: OAuth _token from Yandex.OAuth
         """
 
-        url = "https://iam.api.cloud.yandex.net/iam/v1/tokens"
-        data = {"yandexPassportOauthToken": yandex_passport_oauth_token}
-        answer = requests.post(url, json=data)
-
-        if answer.ok:
-            self.token = answer.json().get('iamToken')
-        else:
-            raise RequestError(answer.json())
+        self._headers = {
+            'Authorization': 'Bearer {}'.format(get_iam_token(yandex_passport_oauth_token=yandex_passport_oauth_token))
+        }
 
     def _synthesize_stream(self, **kwargs):
         """Creates request to generate speech from text"""
 
         url = 'https://tts.api.cloud.yandex.net/speech/v1/tts:synthesize'
-        headers = {'Authorization': 'Bearer ' + self.token}
-
-        answer = requests.post(url, headers=headers, data=kwargs, stream=True)
+        answer = requests.post(url, headers=self._headers, data=kwargs, stream=True)
 
         if not answer.ok:
             raise RequestError(answer.json())
@@ -418,7 +507,7 @@ class SynthesizeAudio:
 
         :type format: string
         :param format: The format of the synthesized audio. Acceptable values:
-            * `lpcm` — Audio file is synthesized in LPCM format with no WAV header. Audio properties:
+            * `lpcm` — Audio file is synthesized in LPCM format with no WAV _header. Audio properties:
 
                 * Sampling — 8, 16, or 48 kHz, depending on the value of the `sampleRateHertz` parameter.
                 * Bit depth — 16-bit.
@@ -481,7 +570,7 @@ class SynthesizeAudio:
 
         :type format: string
         :param format: The format of the synthesized audio. Acceptable values:
-            * `lpcm` — Audio file is synthesized in LPCM format with no WAV header. Audio properties:
+            * `lpcm` — Audio file is synthesized in LPCM format with no WAV _header. Audio properties:
 
                 * Sampling — 8, 16, or 48 kHz, depending on the value of the `sampleRateHertz` parameter.
                 * Bit depth — 16-bit.

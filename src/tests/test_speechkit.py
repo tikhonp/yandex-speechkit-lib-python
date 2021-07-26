@@ -2,6 +2,8 @@ import unittest
 import io
 import os
 import pathlib
+import time
+import warnings
 
 import speechkit
 
@@ -34,6 +36,39 @@ class RequestErrorTestCase(unittest.TestCase):
         self.assertEqual(str(the_exception), '3 message')
 
 
+class GetIamTokenTestCase(unittest.TestCase):
+    def test_assert_empty_data(self):
+        with self.assertRaises(speechkit.InvalidDataError):
+            speechkit.get_iam_token()
+
+    def test_assert_invalid_data(self):
+        with self.assertRaises(speechkit.InvalidDataError):
+            speechkit.get_iam_token(yandex_passport_oauth_token='', jwt='')
+
+    def test_request(self):
+        api_key = os.environ.get('API_KEY')
+
+        data = speechkit.get_iam_token(yandex_passport_oauth_token=api_key)
+        self.assertIsInstance(data, str)
+
+
+class GetApiKeyTestCase(unittest.TestCase):
+    def test_request(self):
+        api_key = os.environ.get('API_KEY')
+        service_account_id = os.environ.get('SERVICE_ACCOUNT_ID')
+
+        data = speechkit.get_api_key(api_key, service_account_id)
+        self.assertIsInstance(data, str)
+
+
+class ListOfServiceAccountsTestCase(unittest.TestCase):
+    def test_request(self):
+        api_key = os.environ.get('API_KEY')
+        folderId = os.environ.get('CATALOG')
+        data = speechkit.list_of_service_accounts(api_key, folderId)
+        self.assertIsInstance(data, list)
+
+
 class RecognizeShortAudioTestCase(unittest.TestCase):
     def test_assert_wrong_key_and_wrong_token(self):
         with self.assertRaises(speechkit.RequestError):
@@ -62,12 +97,56 @@ class RecognizeShortAudioTestCase(unittest.TestCase):
         self.assertIsInstance(text, str)
 
 
-class ObjectStorageTestCase(unittest.TestCase):
-    pass
-
-
 class RecognizeLongAudio(unittest.TestCase):
-    pass
+    def setUp(self):
+        warnings.filterwarnings("ignore", category=ResourceWarning, message="unclosed.*<ssl.SSLSocket.*>")
+
+    def test_init_wrong_description_and_api_key(self):
+        with self.assertRaises(speechkit.InvalidDataError):
+            speechkit.RecognizeLongAudio(1, 'aid', 'buckn')
+
+        with self.assertRaises(speechkit.InvalidDataError):
+            speechkit.RecognizeLongAudio('', '', 'buckn')
+
+        with self.assertRaises(speechkit.InvalidDataError):
+            speechkit.RecognizeLongAudio('lol', 'acid', 'buckn', aws_credentials_description='l' * 257)
+
+    def test_assert_wrong_key_and_wrong_token(self):
+        with self.assertRaises(speechkit.RequestError):
+            speechkit.RecognizeLongAudio('lol', '', 'buckn')
+
+    def test_init(self):
+        api_key = os.environ.get('API_KEY')
+        service_account_id = os.environ.get('SERVICE_ACCOUNT_ID')
+        bucket_name = os.environ.get('BUCKET_NAME')
+        speechkit.RecognizeLongAudio(api_key, service_account_id, bucket_name)
+
+    def test_recognition(self):
+        api_key = os.environ.get('API_KEY')
+        service_account_id = os.environ.get('SERVICE_ACCOUNT_ID')
+        bucket_name = os.environ.get('BUCKET_NAME')
+        folderId = os.environ.get('CATALOG')
+
+        recognizeLongAudio = speechkit.RecognizeLongAudio(api_key, service_account_id, bucket_name)
+
+        self.path = os.path.join(os.path.dirname(__file__), 'test_rec.wav')
+        with open(self.path, 'wb') as f:
+            f.write(test_data)
+
+        recognizeLongAudio.send_for_recognition(
+            self.path, folder_id=folderId, audioEncoding='LINEAR16_PCM', sampleRateHertz='48000',
+            audioChannelCount=1, rawResults=False
+        )
+
+        while True:
+            time.sleep(2)
+            if recognizeLongAudio.get_recognition_results(): break
+
+        data = recognizeLongAudio.get_data()
+        self.assertIsInstance(data, (list, type(None)))
+
+        text = recognizeLongAudio.get_raw_text()
+        self.assertIsInstance(text, str)
 
 
 class SynthesizeAudio(unittest.TestCase):
