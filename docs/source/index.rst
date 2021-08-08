@@ -10,7 +10,13 @@ Welcome to speechkit's documentation!
    :maxdepth: 2
    :caption: Contents:
     
-   modules
+   speechkit
+
+   auth
+
+   utils
+
+   exceptions
 
 
 Indices and tables

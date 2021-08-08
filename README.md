@@ -30,44 +30,54 @@ python -m pip install speechkit
 
 There are support of recognizing long and short audio and synthesis. For more information please read docs below.
 
-#### For short audio
-
-From a Python interpreter:
+First you need create session for authorisation:
 
 ```python3
-import speechkit
+from speechkit import Session
 
-recognizeShortAudio = speechkit.RecognizeShortAudio(str('<yandex_passport_oauth_token>'))
+session = Session.from_yandex_passport_oauth_token('<oauth_token>', '<folder_id>')
+session = Session.from_api_key('<api-key>')
+session = Session.from_jwt('<jwt_token>')
+```
+
+There are also function for getting credentials (read docstrings for more info):
+`Speechkit.auth.generate_jwt`,  `speechkit.auth.get_iam_token`, `speechkit.auth.get_api_key`
+
+### For audio recognition
+
+Short audio:
+
+```python3
+from speechkit import ShortAudioRecognition
+
+recognizeShortAudio = ShortAudioRecognition(session)
 with open('/Users/tikhon/Desktop/out.wav', 'rb') as f:
     data = f.read()
 
-print(recognizeShortAudio.recognize(data, folderId='<folder _id>', format='lpcm', sampleRateHertz='48000'))
+print(recognizeShortAudio.recognize(data, format='lpcm', sampleRateHertz='48000'))
 
-'Текст который нужно распознать'
+[out]: 'text that need to be recognized'
 ```
 
-#### For synthesis
+See example with long audio [long_audio_recognition.py](https://github.com/TikhonP/yandex-speechkit-lib-python/blob/master/examples/long_audio_recognition.py).
+
+See example with streaming audio [streaming_recognize.py](https://github.com/TikhonP/yandex-speechkit-lib-python/blob/master/examples/streaming_recognize.py)
+### For synthesis
 
 ```python3
-import speechkit
+from speechkit import SpeechSynthesis
 
-synthesizeAudio = speechkit.SynthesizeAudio(str('<yandex_passport_oauth_token>'))
-synthesizeAudio.synthesize(str('/Users/tikhon/Desktop/out.wav'), text='Текст который нужно синтезировать',
-                           voice='oksana', format='lpcm', sampleRateHertz='16000', folderId='<folder _id>')
+synthesizeAudio = SpeechSynthesis(session)
+synthesizeAudio.synthesize(
+    str('/Users/tikhon/Desktop/out.wav'), text='Текст который нужно синтезировать',
+    voice='oksana', format='lpcm', sampleRateHertz='16000'
+)
 ```
-
-#### For long audio
-
-See [long_audio_recognition.py](https://github.com/TikhonP/yandex-speechkit-lib-python/blob/master/examples/long_audio_recognition.py)
 
 # Speechkit documentation
 
 See [speechkit docs](https://github.com/TikhonP/yandex-speechkit-lib-python/blob/master/DOCS.md) for more info.
 
-# Todo
-
--
-
 # License
 
-Copyright 2021 Tikhon Petrishchev
+Copyright 2021, Tikhon Petrishchev

@@ -1,20 +1,25 @@
-from sys import argv
 import time
+from sys import argv
 
-import speechkit
+from speechkit import RecognitionLongAudio, Session
+from speechkit.auth import generate_jwt
 
 _, filename = argv
 
-api_key = os.environ.get('API_KEY')
-service_account_id = os.environ.get('SERVICE_ACCOUNT_ID')
 bucket_name = os.environ.get('BUCKET_NAME')
-folder_id = os.environ.get('CATALOG')
+service_account_id = os.environ.get('SERVICE_ACCOUNT_ID')
+key_id = os.environ.get('YANDEX_KEY_ID')
+private_key = os.environ.get('YANDEX_PRIVATE_KEY').replace('\\n', '\n').encode()
 
-if not api_key or not service_account_id or not bucket_name or not folder_id:
-    print("Specify `API_KEY`, `SERVICE_ACCOUNT_ID`, `BUCKET_NAME`, `CATALOG` environment variables.")
+if not key_id or not service_account_id or not bucket_name or not private_key:
+    print("Specify `YANDEX_KEY_ID`, `SERVICE_ACCOUNT_ID`, `BUCKET_NAME`, `private_key` environment variables.")
     exit()
 
-recognize_long_audio = speechkit.RecognizeLongAudio(api_key, service_account_id, bucket_name)
+jwt = generate_jwt(service_account_id, key_id, private_key)
+session = Session.from_jwt(jwt)
+
+recognize_long_audio = RecognitionLongAudio(session, service_account_id, bucket_name)
+
 print("Sending file for recognition...")
 recognize_long_audio.send_for_recognition(
     filename, audioEncoding='LINEAR16_PCM', sampleRateHertz='48000',
