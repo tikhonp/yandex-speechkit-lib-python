@@ -1,5 +1,5 @@
-boto3==1.18.6
-requests==2.25.1
+boto3==1.18.16
+requests==2.26.0
 grpcio-tools==1.39.0
 PyJWT==2.1.0
 cryptography==3.4.7

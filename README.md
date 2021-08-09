@@ -1,6 +1,6 @@
 # Yandex Speechkit Python SDK
 
-![PyPI](https://img.shields.io/pypi/v/speechkit) ![GitHub](https://img.shields.io/github/license/tikhonp/yandex-speechkit-lib-python) ![PyPI - Format](https://img.shields.io/pypi/format/wheel) [![Build Status](https://travis-ci.com/TikhonP/yandex-speechkit-lib-python.svg?branch=master)](https://travis-ci.com/TikhonP/yandex-speechkit-lib-python) [![Updates](https://pyup.io/repos/github/TikhonP/yandex-speechkit-lib-python/shield.svg)](https://pyup.io/repos/github/TikhonP/yandex-speechkit-lib-python/) [![Python 3](https://pyup.io/repos/github/TikhonP/yandex-speechkit-lib-python/python-3-shield.svg)](https://pyup.io/repos/github/TikhonP/yandex-speechkit-lib-python/) [![codecov](https://codecov.io/gh/tikhonp/yandex-speechkit-lib-python/branch/master/graph/badge.svg?token=NRNV9E36I4)](https://codecov.io/gh/tikhonp/yandex-speechkit-lib-python)
+![PyPI](https://img.shields.io/pypi/v/speechkit) ![GitHub](https://img.shields.io/github/license/tikhonp/yandex-speechkit-lib-python) ![PyPI - Format](https://img.shields.io/pypi/format/wheel) [![Build Status](https://travis-ci.com/TikhonP/yandex-speechkit-lib-python.svg?branch=master)](https://travis-ci.com/TikhonP/yandex-speechkit-lib-python) [![Updates](https://pyup.io/repos/github/TikhonP/yandex-speechkit-lib-python/shield.svg)](https://pyup.io/repos/github/TikhonP/yandex-speechkit-lib-python/) [![Python 3](https://pyup.io/repos/github/TikhonP/yandex-speechkit-lib-python/python-3-shield.svg)](https://pyup.io/repos/github/TikhonP/yandex-speechkit-lib-python/) [![codecov](https://codecov.io/gh/tikhonp/yandex-speechkit-lib-python/branch/master/graph/badge.svg?token=NRNV9E36I4)](https://codecov.io/gh/tikhonp/yandex-speechkit-lib-python) [![Documentation Status](https://readthedocs.org/projects/yandex-speechkit-lib-python/badge/?version=latest)](https://yandex-speechkit-lib-python.readthedocs.io/en/latest/?badge=latest)
 
 Python SDK for Yandex Speechkit API.
 
@@ -25,6 +25,10 @@ $ python -m pip install .
 ```bash
 python -m pip install speechkit
 ```
+
+# Speechkit documentation
+
+See [speechkit docs](https://yandex-speechkit-lib-python.readthedocs.io/en/latest/index.html) for more info.
 
 ## Using speechkit
 
@@ -73,10 +77,6 @@ synthesizeAudio.synthesize(
     voice='oksana', format='lpcm', sampleRateHertz='16000'
 )
 ```
-
-# Speechkit documentation
-
-See [speechkit docs](https://github.com/TikhonP/yandex-speechkit-lib-python/blob/master/DOCS.md) for more info.
 
 # License
 
