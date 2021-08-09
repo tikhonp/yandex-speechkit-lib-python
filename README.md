@@ -28,7 +28,8 @@ python -m pip install speechkit
 
 # Speechkit documentation
 
-See [speechkit docs](https://yandex-speechkit-lib-python.readthedocs.io/en/latest/index.html) for more info.
+See [speechkit docs](https://yandex-speechkit-lib-python.readthedocs.io/en/latest/index.html) for more
+info. [PDF docs](https://yandex-speechkit-lib-python.readthedocs.io/_/downloads/en/latest/pdf/)
 
 ## Using speechkit
 
@@ -39,10 +40,17 @@ First you need create session for authorisation:
 ```python3
 from speechkit import Session
 
-session = Session.from_yandex_passport_oauth_token('<oauth_token>', '<folder_id>')
-session = Session.from_api_key('<api-key>')
-session = Session.from_jwt('<jwt_token>')
+oauth_token = str('<oauth_token>')
+folder_id = str('<folder_id>')
+api_key = str('<api-key>')
+jwt_token = str('<jwt_token>')
+
+oauth_session = Session.from_yandex_passport_oauth_token(oauth_token, folder_id)
+api_key_session = Session.from_api_key(api_key)
+jwt_session = Session.from_jwt(jwt_token)
 ```
+
+Use created session to make other requests.
 
 There are also function for getting credentials (read docstrings for more info):
 `Speechkit.auth.generate_jwt`,  `speechkit.auth.get_iam_token`, `speechkit.auth.get_api_key`
@@ -55,17 +63,21 @@ Short audio:
 from speechkit import ShortAudioRecognition
 
 recognizeShortAudio = ShortAudioRecognition(session)
-with open('/Users/tikhon/Desktop/out.wav', 'rb') as f:
+with open(str('/Users/tikhon/Desktop/out.wav'), str('rb')) as f:
     data = f.read()
 
 print(recognizeShortAudio.recognize(data, format='lpcm', sampleRateHertz='48000'))
 
-[out]: 'text that need to be recognized'
+# Will be printed: 'text that need to be recognized'
 ```
 
-See example with long audio [long_audio_recognition.py](https://github.com/TikhonP/yandex-speechkit-lib-python/blob/master/examples/long_audio_recognition.py).
+See example with long
+audio [long_audio_recognition.py](https://github.com/TikhonP/yandex-speechkit-lib-python/blob/master/examples/long_audio_recognition.py)
+.
 
-See example with streaming audio [streaming_recognize.py](https://github.com/TikhonP/yandex-speechkit-lib-python/blob/master/examples/streaming_recognize.py)
+See example with streaming
+audio [streaming_recognize.py](https://github.com/TikhonP/yandex-speechkit-lib-python/blob/master/examples/streaming_recognize.py)
+
 ### For synthesis
 
 ```python3
@@ -80,4 +92,6 @@ synthesizeAudio.synthesize(
 
 # License
 
-Copyright 2021, Tikhon Petrishchev
+MIT
+
+Tikhon Petrishchev 2021
