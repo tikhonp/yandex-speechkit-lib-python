@@ -1,6 +1,8 @@
 import os
+import sys
 
 import pyaudio
+from iterators import TimeoutIterator
 
 from speechkit import DataStreamingRecognition, Session
 from speechkit.auth import generate_jwt
@@ -31,23 +33,28 @@ def gen_audio_from_file_function():
             data = f.read(CHUNK_SIZE)
 
 
-def gen_audio_capture_function():
+def gen_audio_capture_function(chunk_size=1024):
     p = pyaudio.PyAudio()
     stream = p.open(
         format=pyaudio.paInt16,
         channels=1,
         rate=8000,
         input=True,
-        frames_per_buffer=CHUNK_SIZE
+        frames_per_buffer=chunk_size
     )
     try:
         while True:
-            yield stream.read(CHUNK_SIZE)
+            yield stream.read(chunk_size)
     finally:
         stream.stop_stream()
         stream.close()
         p.terminate()
 
 
-for i in data_streaming_recognition.recognize(gen_audio_capture_function):
-    print(i)  # (['text'], final_flag, end_of_utterance_flag)
+for text, final, end_of_utterance in data_streaming_recognition.recognize(
+        gen_audio_capture_function, chunk_size=CHUNK_SIZE
+):
+    print(text[0])  # text is list of alternatives
+
+    if final:  # Stop when final_flag set
+        break

@@ -29,7 +29,7 @@ class DataStreamingRecognition:
 
     :Example:
 
-    >>> CHUNK_SIZE = 4000
+    >>> chunk_size = 4000
     >>> session = Session.from_jwt("jwt")
     >>> data_streaming_recognition = DataStreamingRecognition(
     ...     session,
@@ -42,10 +42,10 @@ class DataStreamingRecognition:
     ...
     >>> def gen_audio_from_file_function():
     ...     with open('/path/to/pcm_data/speech.pcm', 'rb') as f:
-    ...         data = f.read(CHUNK_SIZE)
+    ...         data = f.read(chunk_size)
     ...         while data != b'':
     ...             yield data
-    ...             data = f.read(CHUNK_SIZE)
+    ...             data = f.read(chunk_size)
     ...
     >>> for i in data_streaming_recognition.recognize(gen_audio_capture_function):
     ...     print(i)  # (['text'], final_flag, end_of_utterance_flag)
@@ -109,9 +109,9 @@ class DataStreamingRecognition:
 
         self._streaming_config = stt_service_pb2.RecognitionConfig(**config)
 
-    def _gen(self, gen_audio_function):
+    def _gen(self, gen_audio_function, *args, **kwargs):
         """
-        Generate audio fragments.
+        Generate audio fragments. Pass args and kwargs to pass it into :py:meth:`gen_audio_function`.
 
         :param function gen_audio_function: Function generates audio data
         :return: Serialized data for sending
@@ -122,17 +122,18 @@ class DataStreamingRecognition:
 
             yield stt_service_pb2.StreamingRecognitionRequest(config=self._streaming_config)
 
-            for data in gen_audio_function():
+            for data in gen_audio_function(*args, **kwargs):
                 yield stt_service_pb2.StreamingRecognitionRequest(audio_content=data)
 
         except Exception as e:
             logging.error(e)
             raise e
 
-    def recognize_raw(self, gen_audio_function):
+    def recognize_raw(self, gen_audio_function, *args, **kwargs):
         """
         Recognize streaming data, gen_audio_function must yield audio data with parameters given in init.
-        Answer type read in `Yandex Docs <https://cloud.yandex.com/en/docs/speechkit/stt/streaming#response>`_
+        Answer type read in `Yandex Docs <https://cloud.yandex.com/en/docs/speechkit/stt/streaming#response>`_.
+        Pass args and kwargs to pass it into :py:meth:`gen_audio_function`.
 
         :param function gen_audio_function: Function generates audio data
         :return: Yields recognized data in raw format
@@ -145,21 +146,22 @@ class DataStreamingRecognition:
         channel = grpc.secure_channel('stt.api.cloud.yandex.net:443', cred)
         stub = stt_service_pb2_grpc.SttServiceStub(channel)
 
-        it = stub.StreamingRecognize(self._gen(gen_audio_function), metadata=(self._headers,))
+        it = stub.StreamingRecognize(self._gen(gen_audio_function, *args, **kwargs), metadata=(self._headers,))
 
         for chunk in it:
             yield chunk
 
-    def recognize(self, gen_audio_function):
+    def recognize(self, gen_audio_function, *args, **kwargs):
         """
         Recognize streaming data, gen_audio_function must yield audio data with parameters given in init.
+        Pass args and kwargs to pass it into :py:meth:`gen_audio_function`.
 
         :param function gen_audio_function: Function generates audio data
         :return: yields tuple, where first element is list of alternatives text, second final (boolean) flag,
             third endOfUtterance (boolean) flag, ex. (['text'], False, False)
         :rtype: tuple
         """
-        for item in self.recognize_raw(gen_audio_function):
+        for item in self.recognize_raw(gen_audio_function, *args, **kwargs):
             alternatives = [i.text for i in item.chunks[0].alternatives]
             final = item.chunks[0].final
             end_of_utterance = item.chunks[0].end_of_utterance

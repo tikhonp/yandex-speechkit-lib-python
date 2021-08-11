@@ -4,7 +4,7 @@ Python SDK for using Yandex Speech recognition and synthesis
 """
 
 __author__ = 'Tikhon Petrishchev'
-__version__ = '2.0.1'
+__version__ = '2.0.2'
 
 from speechkit._auth import Session
 from speechkit._recognition.streaming_recognition import DataStreamingRecognition
