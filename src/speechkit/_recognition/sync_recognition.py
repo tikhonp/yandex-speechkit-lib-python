@@ -355,7 +355,7 @@ class RecognitionLongAudio:
 
         if self._answer_data is None:
             raise ValueError("You must call `RecognitionLongAudio.get_recognition_results` first")
-        return self._answer_data.get('results')
+        return self._answer_data.get('response', {}).get('chunks', [])
 
     def get_raw_text(self):
         """
