@@ -4,7 +4,8 @@ Python SDK for Yandex SpeechKit API.
 
 <div align="center">
 
-![PyPI](https://img.shields.io/pypi/v/speechkit) ![GitHub](https://img.shields.io/github/license/tikhonp/yandex-speechkit-lib-python) [![Build Status](https://travis-ci.com/TikhonP/yandex-speechkit-lib-python.svg?branch=master)](https://travis-ci.com/TikhonP/yandex-speechkit-lib-python) [![Updates](https://pyup.io/repos/github/TikhonP/yandex-speechkit-lib-python/shield.svg)](https://pyup.io/repos/github/TikhonP/yandex-speechkit-lib-python/) [![codecov](https://codecov.io/gh/tikhonp/yandex-speechkit-lib-python/branch/master/graph/badge.svg?token=NRNV9E36I4)](https://codecov.io/gh/tikhonp/yandex-speechkit-lib-python) 
+![PyPI](https://img.shields.io/pypi/v/speechkit) ![GitHub](https://img.shields.io/github/license/tikhonp/yandex-speechkit-lib-python) [![Build Status](https://travis-ci.com/TikhonP/yandex-speechkit-lib-python.svg?branch=master)](https://travis-ci.com/TikhonP/yandex-speechkit-lib-python) [![Updates](https://pyup.io/repos/github/TikhonP/yandex-speechkit-lib-python/shield.svg)](https://pyup.io/repos/github/TikhonP/yandex-speechkit-lib-python/) [![codecov](https://codecov.io/gh/tikhonp/yandex-speechkit-lib-python/branch/master/graph/badge.svg?token=NRNV9E36I4)](https://codecov.io/gh/tikhonp/yandex-speechkit-lib-python) [![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2FTikhonP%2Fyandex-speechkit-lib-python.svg?type=shield)](https://app.fossa.com/projects/git%2Bgithub.com%2FTikhonP%2Fyandex-speechkit-lib-python?ref=badge_shield)
+
 [![Documentation Status](https://readthedocs.org/projects/yandex-speechkit-lib-python/badge/?version=latest)](https://pip.pypa.io/en/stable/?badge=stable)
 [![Downloads](https://pepy.tech/badge/speechkit)](https://pepy.tech/project/speechkit)
 
@@ -101,3 +102,6 @@ synthesizeAudio.synthesize(
 MIT
 
 Tikhon Petrishchev 2021
+
+
+[![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2FTikhonP%2Fyandex-speechkit-lib-python.svg?type=large)](https://app.fossa.com/projects/git%2Bgithub.com%2FTikhonP%2Fyandex-speechkit-lib-python?ref=badge_large)
