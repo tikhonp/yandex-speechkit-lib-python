@@ -215,7 +215,7 @@ class Session:
 
         return cls(cls.IAM_TOKEN, iam_token, folder_id=folder_id)
 
-    @functools.cached_property
+    @property
     def header(self):
         """
         Authentication header.
@@ -228,7 +228,7 @@ class Session:
         if self._auth_method == self.API_KEY:
             return {'Authorization': 'Api-Key {api_key}'.format(api_key=self._credential)}
 
-    @functools.cached_property
+    @property
     def streaming_recognition_header(self):
         """
         Authentication header for streaming recognition
@@ -242,6 +242,6 @@ class Session:
         if self._auth_method == self.API_KEY:
             return tuple(('authorization', 'Api-Key {api_key}'.format(api_key=self._credential),))
 
-    @functools.cached_property
+    @property
     def auth_method(self):
         return self._auth_method
