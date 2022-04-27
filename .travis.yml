@@ -4,17 +4,6 @@ python:
 - "3.7"
 - "3.8"
 - "3.9"
-before_install:
-- python --version
-- pip install -U pip
-- pip install -r requirements.txt
-- pip install codecov
-install:
-- pip install ".[test]" .
-script:
-- cd src && coverage run -m unittest discover && coverage report
-after_success:
-- codecov
 env:
   global:
   - CODECOV_TOKEN='01b24c9c-9031-4562-9fcf-3fd891664b1d'
@@ -26,3 +15,16 @@ env:
   - secure: SIGAnW54SaoNBQtWpuxmtZL4XGEXQGKtnt5BgmqID5kuxPE1+/tScRH8VB9ZFeIH2iBR8bTVl15wFRDWDHav2z0omxN2penCUQh9SmR8BJZplnKyzBtTaQuQKOx+fUmIVNkTxQszrIV1iXR2mkODqSJFki2pOOqzYHMsz4r3RMb7eNnlpiJr9cXgNDpGr0dIjWsxAQzJXnOYYw4gdjL9SPjmghYYp1dGiE6zHcFjthyLURHYGv515A6kDu/bI1rBXzRUAOtdnqe9iqxcvkiOfaXeeWHrViWDEJWnOqicfniuNleRcL6iiK6o/nDEDO5T9Q/LgFz6JfTz0AHnzk60XtRdwR9vkQWlAm27VEhxk/MOPcSwY4zRhGTHnUaXbQ081rNdfYhDivGeAP03pra0e689wJINE/H/H0n8ZST5YR+H4+TjCc3WQ++ea7duzBl+09b3OSefO3g57fJ+XBme8xCQQPZxi1i+h35OWHsK1Lp4mCpUUjjyhJQ2Tr9d0dhiXk4pBivlGtmdLSWIFWEckgPI9M92usC4E8EOptml50HKFAKjdDgNkYB/sQNc9iwuUboUB4fuPaCEySAXpk/z2Q0+/jNApmK/tjb1YLZjHcblS8/mWS6f+scfa5flPlJowMcbjULmhsEZiejDOe/oWxKMV8tWCdCn7I1a1va84f0=
   - secure: RQdCO4BH/MI09ggPyvS3BnjUuWNSx842iLzdeDnR3aXdhTqn4FVBQkaA2jHaJAwe8/O7JPCbHcqb2vl0tchAPRvoOOiJjrWhsXZmmTwhmjUz0hniGFtsm+SuvBzI+gELyw5DFlc9nyETAvVBLy11FnKVuGGQQ0wyfvutKB1rsN0ng4mJysg1Vruh3FaAzfUkoETWgm17RpnaZgGfw05wgVez4qqHK7Fc3tyXFiGiD8WWlTFdUzH6W/Wf4UU9seT2zlSeoEdKZw9w5ixnVW4p/JW9TMbz6l3t/3P0E2r1YV3bwKOvH/dZ4kA6slTY9TmoKpO6Slg9CQyZszeQM9HroNXxwTWpvQGB5tcpJAYbA1IIYNfZuGKx5pVis6iVQw2d8AInG+GJo4FniLLaTj/gj0LNtwzTBA8csdkQ+Lu35R6M7rhuFZjfDrJ7wlcST05E1G7nVNTepIpKtY+m19eFF3cvErePM2mKtBe/v383dE1cShW9umcrYQha/+1QsHwGtCpisTETmgVezr7mQ0hlESh25nMuxpvs2Wd4uga8xqIE5CNYCu4gZrkD18vf1GGwLlwtjPkC/MjbmJsy4ib7+2g4adcemIOWl6RLRR0Vsm49d0wkAyBgiR1GEfgMjhunB/9mtKeM9zSg+2quddLKs5YbxLaTIuHktkDoUvy2kkQ=
   - secure: jf4PV/Go4MCQcZ+wZt1DgNUg89XXJ5h2q7Ccfv+OTDhMhYA5SR+tMKF3+mMXnzqcP5aesa19+n5a0vUprA4FRDRcep6miEuq6PBUcpW0yiuXJa8Wjr7mCPuECipiEkMa442QK1DSMAQA8YVW7GgH8TtgW+TnONVECkZlSgfnvUa0dEghVwRGrmAwTCVMH80xPYQ74xx3PMGYFjoLROW/xhZ0LZa3o7fBYdOtlOIbkegdnEf0nfebtBThSoNOvugLO7pzh1pLTK50yOfWxkYCsh2QA0kjOIPcwVryyI9sfdf4lmPc4zpWPHvDu+/a4Yi9kVkay70axARMHVJGnZ+x5OG2izRDvCGBRbkfCSDpevCZ2nBpROZMFvP+Y2AmntvtY+lUe3C0vTR7cIm+9vTk1Skb0tJss3IlEoyQBVlLGpCfDnVUO0GVdcBk39/BYDuVei2xJ4ejB14wu49lUJGFCILpPMyGvNvmQQOJRDpemchvfSCTrtWmw3+WWpLSOqRXODOtYMVrwj60Z+Tl0l6zF085zJKQEYgPLZY4r4CS8MCgLAX3jijDTpNLjbx/KTLpIN7b6ld344xN8uAhfVWybXA101w6rm5Cty/b5ofmTI8JOTw/PWa468nVFrk3ly0rZg3hpqsB+pKPs+sROLUYB2d4fDjNqfQRfxTqdC/7MT0=
+before_install:
+- python --version
+- pip install -U pip
+- pip install -r requirements.txt
+- pip install codecov
+install:
+- pip install ".[test]" .
+before_script:
+- cd src
+script:
+- coverage run -m unittest discover && coverage report
+after_success:
+- codecov
