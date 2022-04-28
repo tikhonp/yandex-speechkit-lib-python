@@ -11,6 +11,8 @@ class GenerateJwtTestCase(unittest.TestCase):
         service_account_id = os.environ.get('SERVICE_ACCOUNT_ID')
         key_id = os.environ.get('YANDEX_KEY_ID')
         private_key = os.environ.get('YANDEX_PRIVATE_KEY').replace('\\n', '\n').encode()
+        print(os.environ.get('YANDEX_PRIVATE_KEY'))
+        print(os.environ.get('YANDEX_PRIVATE_KEY').replace('\\n', '\n'))
         jwt = generate_jwt(service_account_id, key_id, private_key)
         self.assertIsInstance(jwt, str)
 

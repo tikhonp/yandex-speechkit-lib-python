@@ -10,8 +10,6 @@ bucket_name = os.environ.get('BUCKET_NAME')
 service_account_id = os.environ.get('SERVICE_ACCOUNT_ID')
 key_id = os.environ.get('YANDEX_KEY_ID')
 private_key = os.environ.get('YANDEX_PRIVATE_KEY').replace('\\n', '\n').encode()
-print(os.environ.get('YANDEX_PRIVATE_KEY'))
-print(os.environ.get('YANDEX_PRIVATE_KEY').replace('\\n', '\n'))
 
 if not key_id or not service_account_id or not bucket_name or not private_key:
     print("Specify `YANDEX_KEY_ID`, `SERVICE_ACCOUNT_ID`, `BUCKET_NAME`, `private_key` environment variables.")
