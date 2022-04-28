@@ -134,3 +134,5 @@ dmypy.json
 .idea/
 bash_profile
 /YANDEX_PRIVATE_KEY.txt
+/src/tests/test_rec.wav
+/src/tests/test_synth.wav
