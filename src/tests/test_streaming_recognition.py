@@ -6,11 +6,16 @@ from speechkit.auth import generate_jwt
 import speechkit
 
 
+def get_private_key():
+    with open('../YANDEX_PRIVATE_KEY.txt', 'rb') as f:
+        return f.read()
+
+
 class DataStreamingRecognitionTestCase(TestCase):
     def setUp(self) -> None:
         service_account_id = os.environ.get('SERVICE_ACCOUNT_ID')
         key_id = os.environ.get('YANDEX_KEY_ID')
-        private_key = os.environ.get('YANDEX_PRIVATE_KEY').replace('\\n', '\n').encode()
+        private_key = get_private_key()
 
         jwt = generate_jwt(service_account_id, key_id, private_key)
         self.session = Session.from_jwt(jwt)

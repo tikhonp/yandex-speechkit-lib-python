@@ -6,13 +6,16 @@ from speechkit.auth import generate_jwt, get_iam_token, get_api_key
 from speechkit import Session
 
 
+def get_private_key():
+    with open('../YANDEX_PRIVATE_KEY.txt', 'rb') as f:
+        return f.read()
+
+
 class GenerateJwtTestCase(unittest.TestCase):
     def test_generating(self):
         service_account_id = os.environ.get('SERVICE_ACCOUNT_ID')
         key_id = os.environ.get('YANDEX_KEY_ID')
-        private_key = os.environ.get('YANDEX_PRIVATE_KEY').replace('\\n', '\n').encode()
-        print(os.environ.get('YANDEX_PRIVATE_KEY'))
-        print(os.environ.get('YANDEX_PRIVATE_KEY').replace('\\n', '\n'))
+        private_key = get_private_key()
         jwt = generate_jwt(service_account_id, key_id, private_key)
         self.assertIsInstance(jwt, str)
 
@@ -35,7 +38,7 @@ class GetIamTokenTestCase(unittest.TestCase):
     def test_request_jwt(self):
         service_account_id = os.environ.get('SERVICE_ACCOUNT_ID')
         key_id = os.environ.get('YANDEX_KEY_ID')
-        private_key = os.environ.get('YANDEX_PRIVATE_KEY').replace('\\n', '\n').encode()
+        private_key = get_private_key()
         jwt = generate_jwt(service_account_id, key_id, private_key)
 
         data = get_iam_token(jwt_token=jwt)
@@ -70,7 +73,7 @@ class SessionTestCase(TestCase):
     def test_from_jwt(self):
         service_account_id = os.environ.get('SERVICE_ACCOUNT_ID')
         key_id = os.environ.get('YANDEX_KEY_ID')
-        private_key = os.environ.get('YANDEX_PRIVATE_KEY').replace('\\n', '\n').encode()
+        private_key = get_private_key()
         jwt = generate_jwt(service_account_id, key_id, private_key)
 
         session = Session.from_jwt(jwt)
