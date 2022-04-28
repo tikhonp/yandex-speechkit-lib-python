@@ -133,3 +133,4 @@ dmypy.json
 *.swp
 .idea/
 bash_profile
+/YANDEX_PRIVATE_KEY.txt
