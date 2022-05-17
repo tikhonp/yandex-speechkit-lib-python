@@ -7,7 +7,7 @@ from speechkit import Session
 
 
 def get_private_key():
-    with open('../YANDEX_PRIVATE_KEY.txt', 'rb') as f:
+    with open('../.YANDEX_PRIVATE_KEY.txt', 'rb') as f:
         return f.read()
 
 
@@ -19,13 +19,23 @@ class GenerateJwtTestCase(unittest.TestCase):
         jwt = generate_jwt(service_account_id, key_id, private_key)
         self.assertIsInstance(jwt, str)
 
+    def test_assert_incorrect_service_account_id_key_id_private_key(self):
+        with self.assertRaises(ValueError):
+            generate_jwt('', 's', b'')
+
+        with self.assertRaises(ValueError):
+            generate_jwt('s', '', b'')
+
+        with self.assertRaises(ValueError):
+            generate_jwt('s', '', '')
+
 
 class GetIamTokenTestCase(unittest.TestCase):
     def test_assert_empty_data(self):
         with self.assertRaises(ValueError):
             get_iam_token()
 
-    def test_assert_invalid_data(self):
+    def test_assert_invalid_yandex_passport_oauth_token(self):
         with self.assertRaises(ValueError):
             get_iam_token(yandex_passport_oauth_token='', jwt_token='')
 
@@ -52,6 +62,10 @@ class GetApiKeyTestCase(unittest.TestCase):
 
         data = get_api_key(yandex_passport_oauth_token, service_account_id)
         self.assertIsInstance(data, str)
+
+    def test_invalid_data_empty(self):
+        with self.assertRaises(ValueError):
+            get_api_key()
 
 
 class SessionTestCase(TestCase):
@@ -86,6 +100,13 @@ class SessionTestCase(TestCase):
     def test_header_iam_token(self):
         session = Session(Session.IAM_TOKEN, 'hello', None)
         self.assertEqual(session.header, {'Authorization': 'Bearer hello'})
+
+    def test_auth_method(self):
+        session = Session(Session.API_KEY, 'hello', None)
+        self.assertEqual(session.auth_method, Session.API_KEY)
+
+        session = Session(Session.IAM_TOKEN, 'hello', None)
+        self.assertEqual(session.auth_method, Session.IAM_TOKEN)
 
 
 if __name__ == '__main__':

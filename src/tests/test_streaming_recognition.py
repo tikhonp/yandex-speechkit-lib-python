@@ -7,7 +7,7 @@ import speechkit
 
 
 def get_private_key():
-    with open('../YANDEX_PRIVATE_KEY.txt', 'rb') as f:
+    with open('../.YANDEX_PRIVATE_KEY.txt', 'rb') as f:
         return f.read()
 
 

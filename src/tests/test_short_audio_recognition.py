@@ -9,7 +9,7 @@ test_data = b'RIFFl@\x08\x00WAVEfmt \x10\x00\x00\x00\x01\x00\x01\x00\x80\xbb\x00
 
 
 def get_private_key():
-    with open('../YANDEX_PRIVATE_KEY.txt', 'rb') as f:
+    with open('../.YANDEX_PRIVATE_KEY.txt', 'rb') as f:
         return f.read()
 
 

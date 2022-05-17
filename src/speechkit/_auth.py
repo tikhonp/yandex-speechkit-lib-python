@@ -1,5 +1,5 @@
-import functools
 import time
+import uuid
 
 import jwt
 import requests
@@ -116,7 +116,8 @@ class Session:
     API_KEY = 'api_key'
     """Api key if api-key auth, value: 'api_key'"""
 
-    def __init__(self, auth_type, credential, folder_id):
+    def __init__(self, auth_type, credential, folder_id, x_client_request_id_header=False,
+                 x_data_logging_enabled=False):
         """
         Stores credentials for given auth method
 
@@ -124,6 +125,14 @@ class Session:
         :param string | None folder_id: Id of the folder that you have access to. Don't specify this field if
             you make a request on behalf of a service account.
         :param string credential: Auth key iam or api key
+        :param boolean x_client_request_id_header: include x-client-request-id. `x-client-request-id` is a unique
+            request ID. It is generated using uuid. Send this ID to the technical support team to help us find
+            a specific request in the system and assist you. To get x_client_request_id_header use
+            `Session.get_x_client_request_id()` method.
+        :param boolean x_data_logging_enabled: A flag that allows data passed by the user in the request to be saved.
+            By default, we do not save any audio or text that you send. If you pass the true value in this header,
+            your data is saved. This data, along with the request ID, will help the Yandex technical support team solve your
+            problem.
         """
         if auth_type not in (self.IAM_TOKEN, self.API_KEY):
             raise ValueError(
@@ -138,14 +147,25 @@ class Session:
         self._credential = credential
         self.folder_id = folder_id
 
+        self._x_client_request_id = str(uuid.uuid4()) if x_client_request_id_header else None
+        self._x_data_logging_enabled = x_data_logging_enabled
+
     @classmethod
-    def from_api_key(cls, api_key, folder_id=None):
+    def from_api_key(cls, api_key, folder_id=None, x_client_request_id_header=False, x_data_logging_enabled=False):
         """
         Creates session from api key
 
         :param string api_key: Yandex Cloud Api-Key
         :param string | None folder_id: Id of the folder that you have access to. Don't specify this field if
             you make a request on behalf of a service account.
+        :param boolean x_client_request_id_header: include x-client-request-id. `x-client-request-id` is a unique
+            request ID. It is generated using uuid. Send this ID to the technical support team to help us find
+            a specific request in the system and assist you. To get x_client_request_id_header use
+            `Session.get_x_client_request_id()` method.
+        :param boolean x_data_logging_enabled: A flag that allows data passed by the user in the request to be saved.
+            By default, we do not save any audio or text that you send. If you pass the true value in this header,
+            your data is saved. This data, along with the request ID, will help the Yandex technical support team solve your
+            problem.
         :return: Session instance
         :rtype: Session
         """
@@ -160,16 +180,26 @@ class Session:
             if len(folder_id) == 0:
                 raise ValueError("folder_id must not be empty.")
 
-        return cls(cls.API_KEY, api_key, folder_id=folder_id)
+        return cls(cls.API_KEY, api_key, folder_id=folder_id, x_client_request_id_header=x_client_request_id_header,
+                   x_data_logging_enabled=x_data_logging_enabled)
 
     @classmethod
-    def from_yandex_passport_oauth_token(cls, yandex_passport_oauth_token, folder_id):
+    def from_yandex_passport_oauth_token(cls, yandex_passport_oauth_token, folder_id, x_client_request_id_header=False,
+                                         x_data_logging_enabled=False):
         """
         Creates Session from oauth token Yandex account
 
         :param string yandex_passport_oauth_token: OAuth token from Yandex.OAuth
         :param string folder_id: Id of the folder that you have access to. Don't specify this field if
             you make a request on behalf of a service account.
+        :param boolean x_client_request_id_header: include x-client-request-id. `x-client-request-id` is a unique
+            request ID. It is generated using uuid. Send this ID to the technical support team to help us find
+            a specific request in the system and assist you. To get x_client_request_id_header use
+            `Session.get_x_client_request_id()` method.
+        :param boolean x_data_logging_enabled: A flag that allows data passed by the user in the request to be saved.
+            By default, we do not save any audio or text that you send. If you pass the true value in this header,
+            your data is saved. This data, along with the request ID, will help the Yandex technical support team solve your
+            problem.
         :return: Session instance
         :rtype: Session
         """
@@ -187,16 +217,25 @@ class Session:
 
         iam_token = get_iam_token(yandex_passport_oauth_token=yandex_passport_oauth_token)
 
-        return cls(cls.IAM_TOKEN, iam_token, folder_id=folder_id)
+        return cls(cls.IAM_TOKEN, iam_token, folder_id=folder_id, x_client_request_id_header=x_client_request_id_header,
+                   x_data_logging_enabled=x_data_logging_enabled)
 
     @classmethod
-    def from_jwt(cls, jwt_token, folder_id=None):
+    def from_jwt(cls, jwt_token, folder_id=None, x_client_request_id_header=False, x_data_logging_enabled=False):
         """
         Creates Session from JWT token
 
         :param string jwt_token: JWT
         :param string | None folder_id: Id of the folder that you have access to. Don't specify this field if
             you make a request on behalf of a service account.
+        :param boolean x_client_request_id_header: include x-client-request-id. `x-client-request-id` is a unique
+            request ID. It is generated using uuid. Send this ID to the technical support team to help us find
+            a specific request in the system and assist you. To get x_client_request_id_header use
+            `Session.get_x_client_request_id()` method.
+        :param boolean x_data_logging_enabled: A flag that allows data passed by the user in the request to be saved.
+            By default, we do not save any audio or text that you send. If you pass the true value in this header,
+            your data is saved. This data, along with the request ID, will help the Yandex technical support team solve your
+            problem.
         :return: Session instance
         :rtype: Session
         """
@@ -213,7 +252,8 @@ class Session:
 
         iam_token = get_iam_token(jwt_token=jwt_token)
 
-        return cls(cls.IAM_TOKEN, iam_token, folder_id=folder_id)
+        return cls(cls.IAM_TOKEN, iam_token, folder_id=folder_id, x_client_request_id_header=x_client_request_id_header,
+                   x_data_logging_enabled=x_data_logging_enabled)
 
     @property
     def header(self):
@@ -224,9 +264,16 @@ class Session:
         :rtype: dict
         """
         if self._auth_method == self.IAM_TOKEN:
-            return {'Authorization': 'Bearer {iam}'.format(iam=self._credential)}
-        if self._auth_method == self.API_KEY:
-            return {'Authorization': 'Api-Key {api_key}'.format(api_key=self._credential)}
+            h = {'Authorization': 'Bearer {iam}'.format(iam=self._credential)}
+        elif self._auth_method == self.API_KEY:
+            h = {'Authorization': 'Api-Key {api_key}'.format(api_key=self._credential)}
+        else:
+            return
+        if self._x_client_request_id is not None:
+            h.update({'x-client-request-id': self._x_client_request_id})
+        if self._x_data_logging_enabled:
+            h.update({'x-data-logging-enabled': 'true'})
+        return h
 
     @property
     def streaming_recognition_header(self):
@@ -238,10 +285,21 @@ class Session:
         """
 
         if self._auth_method == self.IAM_TOKEN:
-            return tuple(('authorization', 'Bearer {iam}'.format(iam=self._credential),))
-        if self._auth_method == self.API_KEY:
-            return tuple(('authorization', 'Api-Key {api_key}'.format(api_key=self._credential),))
+            h = tuple(('authorization', 'Bearer {iam}'.format(iam=self._credential),))
+        elif self._auth_method == self.API_KEY:
+            h = tuple(('authorization', 'Api-Key {api_key}'.format(api_key=self._credential),))
+        else:
+            return
+
+        if self._x_client_request_id is not None:
+            h = h + tuple(('x-client-request-id', self._x_client_request_id,))
+        if self._x_data_logging_enabled:
+            h = h + tuple(('x-data-logging-enabled', 'true',))
+        return h
 
     @property
     def auth_method(self):
         return self._auth_method
+
+    def get_x_client_request_id(self):
+        return self._x_client_request_id
