@@ -131,8 +131,8 @@ class Session:
             `Session.get_x_client_request_id()` method.
         :param boolean x_data_logging_enabled: A flag that allows data passed by the user in the request to be saved.
             By default, we do not save any audio or text that you send. If you pass the true value in this header,
-            your data is saved. This data, along with the request ID, will help the Yandex technical support team solve your
-            problem.
+            your data is saved. This data, along with the request ID, will help the Yandex technical support team solve
+            your problem.
         """
         if auth_type not in (self.IAM_TOKEN, self.API_KEY):
             raise ValueError(
@@ -164,8 +164,8 @@ class Session:
             `Session.get_x_client_request_id()` method.
         :param boolean x_data_logging_enabled: A flag that allows data passed by the user in the request to be saved.
             By default, we do not save any audio or text that you send. If you pass the true value in this header,
-            your data is saved. This data, along with the request ID, will help the Yandex technical support team solve your
-            problem.
+            your data is saved. This data, along with the request ID, will help the Yandex technical support team solve
+            your problem.
         :return: Session instance
         :rtype: Session
         """
@@ -198,8 +198,8 @@ class Session:
             `Session.get_x_client_request_id()` method.
         :param boolean x_data_logging_enabled: A flag that allows data passed by the user in the request to be saved.
             By default, we do not save any audio or text that you send. If you pass the true value in this header,
-            your data is saved. This data, along with the request ID, will help the Yandex technical support team solve your
-            problem.
+            your data is saved. This data, along with the request ID, will help the Yandex technical support team solve
+            your problem.
         :return: Session instance
         :rtype: Session
         """
@@ -234,8 +234,8 @@ class Session:
             `Session.get_x_client_request_id()` method.
         :param boolean x_data_logging_enabled: A flag that allows data passed by the user in the request to be saved.
             By default, we do not save any audio or text that you send. If you pass the true value in this header,
-            your data is saved. This data, along with the request ID, will help the Yandex technical support team solve your
-            problem.
+            your data is saved. This data, along with the request ID, will help the Yandex technical support team solve
+            your problem.
         :return: Session instance
         :rtype: Session
         """
@@ -299,7 +299,11 @@ class Session:
 
     @property
     def auth_method(self):
+        """Get auth method it may be `Session.IAM_TOKEN` or `Session.API_KEY`"""
+
         return self._auth_method
 
     def get_x_client_request_id(self):
+        """Get generated x_client_request_id value, if enabled on init, else `None`"""
+
         return self._x_client_request_id

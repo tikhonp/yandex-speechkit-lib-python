@@ -52,7 +52,9 @@ api_key = str('<api-key>')
 jwt_token = str('<jwt_token>')
 
 oauth_session = Session.from_yandex_passport_oauth_token(oauth_token, folder_id)
-api_key_session = Session.from_api_key(api_key)
+api_key_session = Session.from_api_key(api_key, x_client_request_id_header=True, x_data_logging_enabled=True) 
+# You can use `x_client_request_id_header` and `x_data_logging_enabled` params to troubleshoot yandex recognition
+# Use `Session.get_x_client_request_id()` method to get x_client_request_id value.
 jwt_session = Session.from_jwt(jwt_token)
 ```
 

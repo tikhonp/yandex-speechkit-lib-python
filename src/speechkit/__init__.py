@@ -1,6 +1,6 @@
 """
 speechkit
-Python SDK for using Yandex Speech recognition and synthesis
+Python SDK for using Yandex Speech recognition and synthesis.
 """
 
 __author__ = 'Tikhon Petrishchev'
