@@ -9,7 +9,7 @@ Welcome to speechkit's documentation!
 Speechkit is python SDK for Yandex SpeechKit API.
 
 Installation
------------
+------------
 
 Assuming that you have Python and virtualenv installed, set up your environment and install the required dependencies
 like this::
@@ -28,7 +28,7 @@ Or you can install the library using pip::
    python -m pip install speechkit
    
 Api Reference
------------
+-------------
 
 .. toctree::
    :maxdepth: 2

@@ -33,6 +33,7 @@ release = '1.3.0'
 # ones.
 extensions = [
     'sphinx.ext.autodoc',
+    'sphinx.ext.viewcode',
     'sphinx_markdown_builder'
 ]
 
