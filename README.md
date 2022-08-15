@@ -4,14 +4,14 @@ Python SDK for Yandex SpeechKit API.
 
 <div align="center">
 
-![PyPI](https://img.shields.io/pypi/v/speechkit) ![GitHub](https://img.shields.io/github/license/tikhonp/yandex-speechkit-lib-python) [![Build Status](https://travis-ci.com/TikhonP/yandex-speechkit-lib-python.svg?branch=master)](https://travis-ci.com/TikhonP/yandex-speechkit-lib-python) [![Updates](https://pyup.io/repos/github/TikhonP/yandex-speechkit-lib-python/shield.svg)](https://pyup.io/repos/github/TikhonP/yandex-speechkit-lib-python/) [![codecov](https://codecov.io/gh/tikhonp/yandex-speechkit-lib-python/branch/master/graph/badge.svg?token=NRNV9E36I4)](https://codecov.io/gh/tikhonp/yandex-speechkit-lib-python) 
+![PyPI](https://img.shields.io/pypi/v/speechkit) ![GitHub](https://img.shields.io/github/license/tikhonp/yandex-speechkit-lib-python) [![Build Status](https://app.travis-ci.com/TikhonP/yandex-speechkit-lib-python.svg?branch=master)](https://app.travis-ci.com/TikhonP/yandex-speechkit-lib-python) [![Updates](https://pyup.io/repos/github/TikhonP/yandex-speechkit-lib-python/shield.svg)](https://pyup.io/repos/github/TikhonP/yandex-speechkit-lib-python/) [![codecov](https://codecov.io/gh/tikhonp/yandex-speechkit-lib-python/branch/master/graph/badge.svg?token=NRNV9E36I4)](https://codecov.io/gh/tikhonp/yandex-speechkit-lib-python) 
 [![Documentation Status](https://readthedocs.org/projects/yandex-speechkit-lib-python/badge/?version=latest)](https://pip.pypa.io/en/stable/?badge=stable) [![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2FTikhonP%2Fyandex-speechkit-lib-python.svg?type=shield)](https://app.fossa.com/projects/git%2Bgithub.com%2FTikhonP%2Fyandex-speechkit-lib-python?ref=badge_shield)
 [![Downloads](https://pepy.tech/badge/speechkit)](https://pepy.tech/project/speechkit)
 
 </div>
 
 For more information please visit [Yandex Speechkit API Docs](https://cloud.yandex.com/en/docs/speechkit/). This lib
-supports short and long audio recognition of speechkit
+supports short and long audio recognition with speechkit
 
 # Getting Started
 
@@ -34,7 +34,7 @@ python -m pip install speechkit
 
 # Speechkit documentation
 
-See [speechkit docs](https://yandex-speechkit-lib-python.readthedocs.io/en/latest/index.html) for more
+Check out [speechkit docs](https://yandex-speechkit-lib-python.readthedocs.io/en/latest/index.html) for more
 info. [PDF docs](https://yandex-speechkit-lib-python.readthedocs.io/_/downloads/en/latest/pdf/)
 
 ## Using speechkit
@@ -79,11 +79,11 @@ print(recognizeShortAudio.recognize(data, format='lpcm', sampleRateHertz='48000'
 # Will be printed: 'text that need to be recognized'
 ```
 
-See example with long
+Look at example with long
 audio [long_audio_recognition.py](https://github.com/TikhonP/yandex-speechkit-lib-python/blob/master/examples/long_audio_recognition.py)
 .
 
-See example with streaming
+Look at example with streaming
 audio [streaming_recognize.py](https://github.com/TikhonP/yandex-speechkit-lib-python/blob/master/examples/streaming_recognize.py)
 
 ### For synthesis
@@ -102,6 +102,7 @@ synthesizeAudio.synthesize(
 
 - [Readthedocs Documentation for this package](https://yandex-speechkit-lib-python.readthedocs.io/en/latest/index.html)
 - [Yandex Speechkit Documentation](https://cloud.yandex.com/en/docs/speechkit/)
+- [Статья на хабре](https://habr.com/ru/post/681566/)
 
 # License
 
