@@ -1,24 +1,24 @@
-# Yandex SpeechKit Python SDK
-
-Python SDK for Yandex SpeechKit API.
-
 <div align="center">
-
-![PyPI](https://img.shields.io/pypi/v/speechkit) ![GitHub](https://img.shields.io/github/license/tikhonp/yandex-speechkit-lib-python) [![Build Status](https://app.travis-ci.com/TikhonP/yandex-speechkit-lib-python.svg?branch=master)](https://app.travis-ci.com/TikhonP/yandex-speechkit-lib-python) [![Updates](https://pyup.io/repos/github/TikhonP/yandex-speechkit-lib-python/shield.svg)](https://pyup.io/repos/github/TikhonP/yandex-speechkit-lib-python/) [![codecov](https://codecov.io/gh/tikhonp/yandex-speechkit-lib-python/branch/master/graph/badge.svg?token=NRNV9E36I4)](https://codecov.io/gh/tikhonp/yandex-speechkit-lib-python) 
+  <br>
+  <h1>🎙 Yandex SpeechKit Python SDK</h1>
+  
+  ![PyPI](https://img.shields.io/pypi/v/speechkit) ![GitHub](https://img.shields.io/github/license/tikhonp/yandex-speechkit-lib-python) [![Build Status](https://app.travis-ci.com/TikhonP/yandex-speechkit-lib-python.svg?branch=master)](https://app.travis-ci.com/TikhonP/yandex-speechkit-lib-python) [![Updates](https://pyup.io/repos/github/TikhonP/yandex-speechkit-lib-python/shield.svg)](https://pyup.io/repos/github/TikhonP/yandex-speechkit-lib-python/) [![codecov](https://codecov.io/gh/tikhonp/yandex-speechkit-lib-python/branch/master/graph/badge.svg?token=NRNV9E36I4)](https://codecov.io/gh/tikhonp/yandex-speechkit-lib-python) 
 [![Documentation Status](https://readthedocs.org/projects/yandex-speechkit-lib-python/badge/?version=latest)](https://pip.pypa.io/en/stable/?badge=stable) [![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2FTikhonP%2Fyandex-speechkit-lib-python.svg?type=shield)](https://app.fossa.com/projects/git%2Bgithub.com%2FTikhonP%2Fyandex-speechkit-lib-python?ref=badge_shield)
 [![Downloads](https://pepy.tech/badge/speechkit)](https://pepy.tech/project/speechkit)
 
 </div>
 
+Python SDK for Yandex SpeechKit API. This SDK allows you to use the cloud API for speech recognition and synthesis from Yandex. 
+
 For more information please visit [Yandex Speechkit API Docs](https://cloud.yandex.com/en/docs/speechkit/). This lib
 supports short and long audio recognition with speechkit
 
-# Getting Started
+## 🛠 Getting Started
 
 Assuming that you have Python and `virtualenv` installed, set up your environment and install the required dependencies
 like this, or you can install the library using `pip`:
 
-```bash
+```sh
 $ git clone https://github.com/TikhonP/yandex-speechkit-lib-python.git
 $ cd yandex-speechkit-lib-python
 $ virtualenv venv
@@ -28,16 +28,16 @@ $ python -m pip install -r requirements.txt
 $ python -m pip install .
 ```
 
-```bash
+```sh
 python -m pip install speechkit
 ```
 
-# Speechkit documentation
+## 📑 Speechkit documentation
 
 Check out [speechkit docs](https://yandex-speechkit-lib-python.readthedocs.io/en/latest/index.html) for more
 info. [PDF docs](https://yandex-speechkit-lib-python.readthedocs.io/_/downloads/en/latest/pdf/)
 
-## Using speechkit
+## 🔮 Using speechkit
 
 There are support of recognizing long and short audio and synthesis. For more information please read docs below.
 
@@ -98,14 +98,18 @@ synthesizeAudio.synthesize(
 )
 ```
 
-# Links
+## 🔗 Links
 
 - [Readthedocs Documentation for this package](https://yandex-speechkit-lib-python.readthedocs.io/en/latest/index.html)
 - [Yandex Speechkit Documentation](https://cloud.yandex.com/en/docs/speechkit/)
 - [Статья на хабре](https://habr.com/ru/post/681566/)
 
-# License
+## 💼 License
 
-[![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2FTikhonP%2Fyandex-speechkit-lib-python.svg?type=large)](https://app.fossa.com/projects/git%2Bgithub.com%2FTikhonP%2Fyandex-speechkit-lib-python?ref=badge_large)
+[MIT](LICENSE)
 
-© Tikhon Petrishchev 2021 - 2022
+In other words, you can use the code for private and commercial purposes with an author attribution (by including the original license file).
+
+Feel free to contact us via email [tikhon.petrishchev@gmail.com](mailto:tikhon.petrishchev@gmail.com).
+
+❤️
