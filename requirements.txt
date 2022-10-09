@@ -1,6 +1,6 @@
 boto3
 requests
 grpcio-tools>=1.39.0
-protobuf~=3.20.3
+protobuf~=3.19.6
 pyjwt>=2.1.0
 cryptography

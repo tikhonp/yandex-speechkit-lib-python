@@ -4,7 +4,6 @@ python:
 - "3.7"
 - "3.8"
 - "3.9"
-- "3.10"
 env:
   global:
   - CODECOV_TOKEN='01b24c9c-9031-4562-9fcf-3fd891664b1d'
