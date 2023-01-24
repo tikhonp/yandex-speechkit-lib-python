@@ -1,4 +1,5 @@
 import time
+import os
 from sys import argv
 
 from speechkit import RecognitionLongAudio, Session
