@@ -114,6 +114,10 @@ Feel free to contact us via email [tikhon.petrishchev@gmail.com](mailto:tikhon.p
 
 ❤️
 
+### Get FOLDER_ID
+```
+FOLDER_ID=$(yc config get folder-id)
+```
 
 ### Create service-account
 ```
