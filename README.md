@@ -117,7 +117,7 @@ Feel free to contact us via email [tikhon.petrishchev@gmail.com](mailto:tikhon.p
 
 ### Create service-account
 ```
-yc iam service-account create --name computeadmin
+yc iam service-account create --name admin
 ```
 
 ### Get id of service-account
