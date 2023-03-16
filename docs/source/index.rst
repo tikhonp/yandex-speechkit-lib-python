@@ -43,31 +43,15 @@ Api Reference
    exceptions
 
 Some Shortcuts dor YC console tool
--------------
+----------------------------------
 
-Get FOLDER_ID:
+Get FOLDER_ID: FOLDER_ID=$(yc config get folder-id)
 
-```
-FOLDER_ID=$(yc config get folder-id)
-```
+Create service-account: yc iam service-account create --name admin
 
-Create service-account:
+Get id of service-account: SA_ID=$(yc iam service-account get --name admin --format json | jq .id -r)
 
-```
-yc iam service-account create --name admin
-```
-
-Get id of service-account:
-
-```
-SA_ID=$(yc iam service-account get --name admin --format json | jq .id -r)
-```
-
-Assign a role to the admin service account using its ID:
-
-```
-yc resource-manager folder add-access-binding --id $FOLDER_ID --role admin --subject serviceAccount:$SA_ID
-```
+Assign a role to the admin service account using its ID: yc resource-manager folder add-access-binding --id $FOLDER_ID --role admin --subject serviceAccount:$SA_ID
 
 Indices and tables
 ==================
