@@ -35,6 +35,31 @@ class RecognizeLongAudio(unittest.TestCase):
         recognize_long_audio = RecognitionLongAudio(session, service_account_id, bucket_name)
         self.assertIsInstance(recognize_long_audio._headers, dict)
 
+    def test_get_aws_credentials(self):
+        service_account_id = os.environ.get('SERVICE_ACCOUNT_ID')
+        key_id = os.environ.get('YANDEX_KEY_ID')
+        private_key = get_private_key()
+        jwt = generate_jwt(service_account_id, key_id, private_key)
+
+        session = Session.from_jwt(jwt)
+        access_key_id, secret = RecognitionLongAudio.get_aws_credentials(session, service_account_id)
+        self.assertIsInstance(access_key_id, str)
+        self.assertIsInstance(secret, str)
+
+    def test_init_from_aws_credentials(self):
+        bucket_name = os.environ.get('BUCKET_NAME')
+        service_account_id = os.environ.get('SERVICE_ACCOUNT_ID')
+        key_id = os.environ.get('YANDEX_KEY_ID')
+        private_key = get_private_key()
+        jwt = generate_jwt(service_account_id, key_id, private_key)
+
+        session = Session.from_jwt(jwt)
+        access_key_id, secret = RecognitionLongAudio.get_aws_credentials(session, service_account_id)
+
+        recognize_long_audio = RecognitionLongAudio(session, service_account_id, bucket_name,
+                                                    aws_access_key_id=access_key_id, aws_secret=secret)
+        self.assertIsInstance(recognize_long_audio._headers, dict)
+
     def test_recognition(self):
         bucket_name = os.environ.get('BUCKET_NAME')
         service_account_id = os.environ.get('SERVICE_ACCOUNT_ID')
@@ -49,9 +74,8 @@ class RecognizeLongAudio(unittest.TestCase):
         with open(self.path, 'wb') as f:
             f.write(test_data)
 
-        recognize_long_audio.send_for_recognition(
-            self.path, audioEncoding='LINEAR16_PCM', sampleRateHertz='48000', audioChannelCount=1, rawResults=False
-        )
+        recognize_long_audio.send_for_recognition(self.path, audioEncoding='LINEAR16_PCM', sampleRateHertz='48000',
+            audioChannelCount=1, rawResults=False)
 
         while True:
             time.sleep(2)

@@ -1,5 +1,5 @@
-import time
 import os
+import time
 from sys import argv
 
 from speechkit import RecognitionLongAudio, Session
@@ -19,7 +19,16 @@ if not key_id or not service_account_id or not bucket_name or not private_key:
 jwt = generate_jwt(service_account_id, key_id, private_key)
 session = Session.from_jwt(jwt)
 
-recognize_long_audio = RecognitionLongAudio(session, service_account_id, bucket_name)
+# Maybe you want to create aws s3 key only once
+# In that case from version 2.2.0 you can do:
+access_key_id, secret = RecognitionLongAudio.get_aws_credentials(session, service_account_id)
+
+# And then use it:
+recognize_long_audio = RecognitionLongAudio(session, service_account_id, bucket_name, aws_access_key_id=access_key_id,
+                                            aws_secret=secret)
+
+# Or you can do it automatically
+# recognize_long_audio = RecognitionLongAudio(session, service_account_id, bucket_name)
 
 print("Sending file for recognition...")
 recognize_long_audio.send_for_recognition(

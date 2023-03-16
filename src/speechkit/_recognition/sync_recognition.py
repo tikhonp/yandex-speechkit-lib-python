@@ -130,18 +130,23 @@ class RecognitionLongAudio:
 
     def __init__(self, session, service_account_id, aws_bucket_name=None,
                  aws_credentials_description='Default AWS credentials created by `speechkit` python SDK',
-                 aws_region_name='ru-central1'):
+                 aws_region_name='ru-central1', aws_access_key_id=None, aws_secret=None):
         """
         Initialize :py:class:`speechkit.RecognitionLongAudio`
 
         :param speechkit.Session session: Session instance for auth
+        :param string service_account_id: Yandex Cloud Service account ID
+        :param string aws_bucket_name: Optional AWS bucket name
+        :param string aws_credentials_description: AWS credentials description
+        :param string aws_region_name: AWS region name
+        :param string aws_access_key_id: Optional AWS access key. Can be got by `.get_aws_credentials`.
+            If None will be generated automatically
+        :param string aws_secret: Optional AWS secret. Can be got by `.get_aws_credentials`.
+            If None will be generated automatically
         """
         self._id = None
         self._answer_data = None
         self._aws_file_name = None
-
-        if len(aws_credentials_description) > 256:
-            raise ValueError("The maximum `description` string length in characters is 256.")
 
         self._headers = session.header
         if session.folder_id:
@@ -149,19 +154,19 @@ class RecognitionLongAudio:
         if session.auth_method == session.API_KEY:
             raise ValueError("Only jwt method supported")
 
-        url_aws_credentials = 'https://iam.api.cloud.yandex.net/iam/aws-compatibility/v1/accessKeys'
-        data_aws_credentials = {'description': aws_credentials_description, 'serviceAccountId': service_account_id}
-        answer = requests.post(url_aws_credentials, headers=self._headers, json=data_aws_credentials)
-
-        if not answer.ok:
-            raise RequestError(answer.json())
-
-        answer = answer.json()
-        self._s3 = self._init_aws(
-            aws_access_key_id=answer.get('accessKey', {}).get('keyId'),
-            aws_secret_access_key=answer.get('secret'),
-            region_name=aws_region_name,
-        )
+        if aws_access_key_id and aws_secret:
+            self._s3 = self._init_aws(
+                aws_access_key_id=aws_access_key_id,
+                aws_secret_access_key=aws_secret,
+                region_name=aws_region_name,
+            )
+        else:
+            access_key_id, secret = self.get_aws_credentials(session, service_account_id, aws_credentials_description)
+            self._s3 = self._init_aws(
+                aws_access_key_id=access_key_id,
+                aws_secret_access_key=secret,
+                region_name=aws_region_name,
+            )
 
         if aws_bucket_name:
             self._aws_bucket_name = aws_bucket_name
@@ -191,16 +196,54 @@ class RecognitionLongAudio:
             **kwargs
         )
 
+    @staticmethod
+    def get_aws_credentials(session, service_account_id,
+                            aws_credentials_description='Default AWS credentials created by `speechkit` python SDK'):
+        """
+        Get AWS credentials from yandex cloud
+
+        :type session: speechkit.Session
+        :param session: Session instance for auth
+
+        :type service_account_id: string
+        :param service_account_id: Yandex Cloud Service account ID
+
+        :type aws_credentials_description: string
+        :param aws_credentials_description: AWS credentials description
+
+        :return: tuple with strings (access_key_id, secret)
+        """
+
+        if len(aws_credentials_description) > 256:
+            raise ValueError("The maximum `description` string length in characters is 256.")
+
+        url_aws_credentials = 'https://iam.api.cloud.yandex.net/iam/aws-compatibility/v1/accessKeys'
+        data_aws_credentials = {'description': aws_credentials_description, 'serviceAccountId': service_account_id}
+        answer = requests.post(url_aws_credentials, headers=session.header, json=data_aws_credentials)
+
+        if not answer.ok:
+            raise RequestError(answer.json())
+
+        answer = answer.json()
+        access_key_id = answer.get('accessKey', {}).get('keyId')
+        secret = answer.get('secret')
+        return access_key_id, secret
+
     def _aws_upload_file(self, file_path, baket_name, aws_file_name):
-        """Upload a file to object storage
+        """
+        Upload a file to object storage
 
         :type file_path: string
         :param file_path: Path to input file
+
         :type baket_name: string
+        :param baket_name:
+
         :type aws_file_name: string
         :param aws_file_name: Name of file in object storage
         """
-        return self._s3.upload_file(file_path, baket_name, aws_file_name)
+
+        self._s3.upload_file(file_path, baket_name, aws_file_name)
 
     def _create_presigned_url(self, bucket_name, aws_file_name,
                               expiration=3600):
@@ -248,7 +291,7 @@ class RecognitionLongAudio:
         :param string model: The language model to be used for recognition.
             Default value: `general`.
 
-        :param boolean profanityFilter: The profanity filter.
+        :param boolean profanityFilter: The profanity filters.
 
         :param string audioEncoding: The format of the submitted audio.
             Acceptable values:
