@@ -51,6 +51,7 @@ jobs:
 
       - name: Test with unittest
         run: |
+          cd src
           coverage run -m unittest discover && coverage report
         env:
           BUCKET_NAME: ${{ secrets.BUCKET_NAME }}
