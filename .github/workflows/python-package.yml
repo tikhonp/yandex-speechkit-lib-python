@@ -55,6 +55,7 @@ jobs:
           SERVICE_API_KEY: ${{ secrets.SERVICE_API_KEY }}
           YANDEX_KEY_ID: ${{ secrets.YANDEX_KEY_ID }}
           YANDEX_OAUTH: ${{ secrets.YANDEX_OAUTH }}
+          YANDEX_PRIVATE_KEY_PASSPHRASE: ${{ secrets.YANDEX_PRIVATE_KEY_PASSPHRASE }}
 
       - name: Code coverage report
         run: |
