@@ -21,6 +21,7 @@ class ListOfServiceAccountsTestCase(unittest.TestCase):
             list_of_service_accounts(session)
 
     def invalid_session_no_folder_id(self):
-        session = Session.from_yandex_passport_oauth_token(api_key)
+        api_key = os.environ.get('YANDEX_OAUTH')
+        session = Session.from_api_key(api_key)
         with self.assertRaises(ValueError):
             list_of_service_accounts(session)
