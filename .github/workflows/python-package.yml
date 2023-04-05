@@ -48,6 +48,7 @@ jobs:
             --output .YANDEX_PRIVATE_KEY.txt .YANDEX_PRIVATE_KEY.txt.gpg
           cd src
           coverage run -m unittest discover && coverage report
+          codecov
         env:
           BUCKET_NAME: ${{ secrets.BUCKET_NAME }}
           CATALOG: ${{ secrets.CATALOG }}
@@ -56,7 +57,3 @@ jobs:
           YANDEX_KEY_ID: ${{ secrets.YANDEX_KEY_ID }}
           YANDEX_OAUTH: ${{ secrets.YANDEX_OAUTH }}
           YANDEX_PRIVATE_KEY_PASSPHRASE: ${{ secrets.YANDEX_PRIVATE_KEY_PASSPHRASE }}
-
-      - name: Code coverage report
-        run: |
-          codecov
