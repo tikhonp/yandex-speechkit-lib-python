@@ -10,6 +10,7 @@ on:
 
 jobs:
   build:
+    name: Build and test Python 🐍 package
 
     runs-on: ubuntu-latest
     strategy:
