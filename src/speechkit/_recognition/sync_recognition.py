@@ -412,5 +412,7 @@ class RecognitionLongAudio:
 
         text = ''
         for chunk in self._answer_data.get('response', {}).get('chunks', []):
-            text += chunk['alternatives'][0]['text']
+            # text += chunk['alternatives'][0]['text']
+            if chunk['channelTag'] == '1':
+                text += f"{chunk['alternatives'][0]['text'].strip()} "
         return text
